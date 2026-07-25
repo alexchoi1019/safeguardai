@@ -3,6 +3,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <string name="app_name">safeguardai</string>
+    <string name="btn_start_test">실시간 탐지 시작 (테스트)</string>
+    <string name="risk_score_initial">위험도: 0%</string>
+    <string name="status_active">🎙️ 실시간 음성 수집 중…</string>
+    <string name="status_waiting">보이스피싱 탐지 대기 중</string>
+    <string name="toast_permission_denied">마이크 권한이 필요합니다.</string>
+    <string name="toast_start">탐지를 시작합니다.</string>
     <style name="Base.Theme.Safeguardai" parent="Theme.Material3.DayNight.NoActionBar">
         
         

@@ -48,8 +48,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startDetection() {
-        tvStatus.text = "🎙️ 실시간 음성 수집 중..."
-        Toast.makeText(this, "탐지를 시작합니다.", Toast.LENGTH_SHORT).show()
+        tvStatus.text = getString(R.string.status_active)
+        Toast.makeText(this, getString(R.string.toast_start), Toast.LENGTH_SHORT).show()
     }
 
     override fun onRequestPermissionsResult(
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startDetection()
             } else {
-                Toast.makeText(this, "마이크 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
     }

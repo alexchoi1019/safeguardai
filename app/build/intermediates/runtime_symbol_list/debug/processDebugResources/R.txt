@@ -3831,6 +3831,7 @@ int string bottomsheet_action_expand 0x7f0f0020
 int string bottomsheet_action_expand_halfway 0x7f0f0021
 int string bottomsheet_drag_handle_clicked 0x7f0f0022
 int string bottomsheet_drag_handle_content_description 0x7f0f0023
+int string btn_start_test 0x7f0f00a7
 int string call_notification_answer_action 0x7f0f0024
 int string call_notification_answer_video_action 0x7f0f0025
 int string call_notification_decline_action 0x7f0f0026
@@ -3955,13 +3956,18 @@ int string path_password_eye 0x7f0f009c
 int string path_password_eye_mask_strike_through 0x7f0f009d
 int string path_password_eye_mask_visible 0x7f0f009e
 int string path_password_strike_through 0x7f0f009f
+int string risk_score_initial 0x7f0f00a8
 int string search_menu_title 0x7f0f00a0
 int string searchbar_scrolling_view_behavior 0x7f0f00a1
 int string searchview_clear_text_content_description 0x7f0f00a2
 int string searchview_navigation_content_description 0x7f0f00a3
 int string side_sheet_accessibility_pane_title 0x7f0f00a4
 int string side_sheet_behavior 0x7f0f00a5
+int string status_active 0x7f0f00a9
 int string status_bar_notification_info_overflow 0x7f0f00a6
+int string status_waiting 0x7f0f00aa
+int string toast_permission_denied 0x7f0f00ab
+int string toast_start 0x7f0f00ac
 int style AlertDialog_AppCompat 0x7f100000
 int style AlertDialog_AppCompat_Light 0x7f100001
 int style Animation_AppCompat_Dialog 0x7f100002

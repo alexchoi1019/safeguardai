@@ -11,6 +11,12 @@ layout activity_main
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
+string btn_start_test
+string risk_score_initial
+string status_active
+string status_waiting
+string toast_permission_denied
+string toast_start
 style Base.Theme.Safeguardai
 style Theme.Safeguardai
 xml backup_rules
