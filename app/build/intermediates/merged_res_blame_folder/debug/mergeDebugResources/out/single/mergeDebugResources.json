@@ -20,10 +20,6 @@
         "source": "C:\\Users\\winne\\.gradle\\daemon\\9.0.0\\com.example.safeguardai.app-main-33:\\xml\\data_extraction_rules.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/layout_activity_main.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/layout/activity_main.xml"
-    },
-    {
         "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.0.0\\com.example.safeguardai.app-debug-31:\\drawable_ic_launcher_foreground.xml.flat",
         "source": "C:\\Users\\winne\\.gradle\\daemon\\9.0.0\\com.example.safeguardai.app-main-33:\\drawable\\ic_launcher_foreground.xml"
     },
@@ -34,5 +30,9 @@
     {
         "merged": "com.example.safeguardai.app-debug-31:/layout-land_activity_main.xml.flat",
         "source": "com.example.safeguardai.app-main-33:/layout-land/activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.0.0\\com.example.safeguardai.app-debug-31:\\layout-land_activity_main.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.0.0\\com.example.safeguardai.app-main-33:\\layout-land\\activity_main.xml"
     }
 ]

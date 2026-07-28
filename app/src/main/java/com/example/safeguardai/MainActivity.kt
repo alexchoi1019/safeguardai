@@ -1,8 +1,10 @@
-package com.example.safeguardai // 본인의 패키지명에 맞게 유지해 주세요!
+package com.example.safeguardai
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -12,11 +14,16 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
-    private val RECORD_AUDIO_PERMISSION_CODE = 1000
+    companion object {
+        private const val RECORD_AUDIO_PERMISSION_CODE = 1000
+    }
 
     private lateinit var tvStatus: TextView
     private lateinit var tvRiskScore: TextView
     private lateinit var btnStart: Button
+
+    private lateinit var audioRecorder: AudioRecorder
+    private var isRecording = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +33,8 @@ class MainActivity : AppCompatActivity() {
         tvRiskScore = findViewById(R.id.tvRiskScore)
         btnStart = findViewById(R.id.btnStart)
 
-        // 버튼 클릭 시 권한 확인 후 탐지 시작
+        audioRecorder = AudioRecorder(this)
+
         btnStart.setOnClickListener {
             checkAudioPermission()
         }
@@ -36,20 +44,41 @@ class MainActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
             != PackageManager.PERMISSION_GRANTED) {
 
-            // 권한 요청 팝업 띄우기
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.RECORD_AUDIO),
                 RECORD_AUDIO_PERMISSION_CODE
             )
         } else {
-            startDetection()
+            startTestRecording()
         }
     }
 
-    private fun startDetection() {
-        tvStatus.text = getString(R.string.status_active)
-        Toast.makeText(this, getString(R.string.toast_start), Toast.LENGTH_SHORT).show()
+    // 테스트용: 5초간 녹음 후 저장된 파일 확인
+    private fun startTestRecording() {
+        if (isRecording) return
+
+        val recordedFile = audioRecorder.startRecording()
+        if (recordedFile != null) {
+            isRecording = true
+            tvStatus.text = "🎙️ 5초간 녹음 중입니다..."
+            Toast.makeText(this, "녹음 시작!", Toast.LENGTH_SHORT).show()
+
+            // 5초(5000ms) 후에 녹음 자동으로 멈추기
+            Handler(Looper.getMainLooper()).postDelayed({
+                val file = audioRecorder.stopRecording()
+                isRecording = false
+                tvStatus.text = "✅ 녹음 완료!"
+                
+                if (file != null && file.exists()) {
+                    Toast.makeText(this, "파일 저장 성공: ${file.name} (${file.length()} bytes)", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "녹음 파일 저장 실패", Toast.LENGTH_SHORT).show()
+                }
+            }, 5000)
+        } else {
+            Toast.makeText(this, "녹음을 시작할 수 없습니다.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -60,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RECORD_AUDIO_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startDetection()
+                startTestRecording()
             } else {
                 Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show()
             }
