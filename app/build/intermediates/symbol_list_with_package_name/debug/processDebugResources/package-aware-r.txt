@@ -3957,6 +3957,7 @@ string path_password_eye
 string path_password_eye_mask_strike_through
 string path_password_eye_mask_visible
 string path_password_strike_through
+string risk_score_format
 string risk_score_initial
 string search_menu_title
 string searchbar_scrolling_view_behavior
@@ -3965,10 +3966,19 @@ string searchview_navigation_content_description
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
 string status_active
+string status_analyzing
 string status_bar_notification_info_overflow
+string status_collecting
+string status_connection_fail
+string status_error_record
+string status_phishing
+string status_safe
+string status_server_error
+string status_suspicious
 string status_waiting
 string toast_permission_denied
 string toast_start
+string toast_start_record
 style AlertDialog_AppCompat
 style AlertDialog_AppCompat_Light
 style Animation_AppCompat_Dialog
