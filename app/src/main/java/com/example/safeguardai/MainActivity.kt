@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                             it.isPhishing || score >= 80 -> {
                                 // 80% 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
                                 rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
-                                tvStatus.text = getString(R.string.status_phishing)
+                                tvStatus.text = getString(R.string.status_phishing_heavy)
                                 tvStatus.setTextColor(Color.RED)
                                 tvRiskScore.setTextColor(Color.RED)
                                 
@@ -123,14 +123,14 @@ class MainActivity : AppCompatActivity() {
                             score >= 40 -> {
                                 // 40~79%: 주의 (주황 배경)
                                 rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
-                                tvStatus.text = getString(R.string.status_suspicious)
+                                tvStatus.text = getString(R.string.status_suspicious_word)
                                 tvStatus.setTextColor(Color.parseColor("#E65100"))
                                 tvRiskScore.setTextColor(Color.parseColor("#E65100"))
                             }
                             else -> {
                                 // 0~39%: 안전 (초록 배경)
                                 rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
-                                tvStatus.text = getString(R.string.status_safe)
+                                tvStatus.text = getString(R.string.status_safe_normal)
                                 tvStatus.setTextColor(Color.parseColor("#2E7D32"))
                                 tvRiskScore.setTextColor(Color.parseColor("#2E7D32"))
                             }
@@ -148,6 +148,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    // 진동 울리기 함수
     private fun triggerVibration() {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -165,6 +166,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // 경고 팝업 창
     private fun showWarningDialog(recognizedText: String) {
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.dialog_warning_title))

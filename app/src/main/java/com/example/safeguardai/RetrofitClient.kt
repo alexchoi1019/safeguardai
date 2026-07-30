@@ -4,8 +4,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    // 안드로이드 에뮬레이터에서 내 PC localhost 접속용 IP
-    private const val BASE_URL = "http://10.0.2.2:8000/"
+    // 실제 PC의 로컬 IP 주소 (Wi-Fi 연결 시 실물 기기용)
+    private const val BASE_URL = "http://172.30.1.92:8000/"
 
     val instance: ApiService by lazy {
         val retrofit = Retrofit.Builder()
