@@ -1,0 +1,36 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color white
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id btnStart
+id rootLayout
+id tvRiskScore
+id tvStatus
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+string btn_start_test
+string dialog_ok
+string dialog_warning_message
+string dialog_warning_title
+string risk_score_format
+string risk_score_initial
+string status_analyzing
+string status_collecting_20s
+string status_connection_fail
+string status_error_record
+string status_phishing_heavy
+string status_safe_normal
+string status_server_error
+string status_suspicious_word
+string status_waiting
+string toast_permission_denied
+string toast_start
+string toast_start_record
+style Base.Theme.Safeguardai
+style Theme.Safeguardai
+xml backup_rules
+xml data_extraction_rules
