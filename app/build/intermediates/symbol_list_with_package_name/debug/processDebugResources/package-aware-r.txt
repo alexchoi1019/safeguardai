@@ -3462,6 +3462,7 @@ id right
 id rightToLeft
 id right_icon
 id right_side
+id rootLayout
 id rounded
 id row_index_key
 id save_non_transition_alpha
@@ -3844,6 +3845,9 @@ string character_counter_content_description
 string character_counter_overflowed_content_description
 string character_counter_pattern
 string clear_text_end_icon_content_description
+string dialog_ok
+string dialog_warning_message
+string dialog_warning_title
 string error_a11y_label
 string error_icon_content_description
 string exposed_dropdown_menu_content_description
@@ -3969,6 +3973,7 @@ string status_active
 string status_analyzing
 string status_bar_notification_info_overflow
 string status_collecting
+string status_collecting_5s
 string status_connection_fail
 string status_error_record
 string status_phishing

@@ -67,6 +67,10 @@ uses-permission#android.permission.RECORD_AUDIO
 ADDED from C:\Users\winne\OneDrive\문서\GitHub\safeguardai\app\src\main\AndroidManifest.xml:9:5-71
 	android:name
 		ADDED from C:\Users\winne\OneDrive\문서\GitHub\safeguardai\app\src\main\AndroidManifest.xml:9:22-68
+uses-permission#android.permission.VIBRATE
+ADDED from C:\Users\winne\OneDrive\문서\GitHub\safeguardai\app\src\main\AndroidManifest.xml:10:5-66
+	android:name
+		ADDED from C:\Users\winne\OneDrive\문서\GitHub\safeguardai\app\src\main\AndroidManifest.xml:10:22-63
 uses-permission#android.permission.READ_PHONE_STATE
 ADDED from C:\Users\winne\OneDrive\문서\GitHub\safeguardai\app\src\main\AndroidManifest.xml:11:5-75
 	android:name

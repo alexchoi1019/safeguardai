@@ -5,6 +5,7 @@ color white
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 id btnStart
+id rootLayout
 id tvRiskScore
 id tvStatus
 layout activity_main
@@ -12,11 +13,15 @@ mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
 string btn_start_test
+string dialog_ok
+string dialog_warning_message
+string dialog_warning_title
 string risk_score_format
 string risk_score_initial
 string status_active
 string status_analyzing
 string status_collecting
+string status_collecting_5s
 string status_connection_fail
 string status_error_record
 string status_phishing
