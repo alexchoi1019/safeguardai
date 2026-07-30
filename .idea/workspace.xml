@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AndroidLayouts">
-    <shared>
-      <config />
-    </shared>
     <layouts>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout-land/activity_main.xml">
-        <config>
-          <state>Landscape</state>
-          <theme>@style/Theme.Safeguardai</theme>
-        </config>
-      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
         <config>
           <theme>@style/Theme.Safeguardai</theme>
