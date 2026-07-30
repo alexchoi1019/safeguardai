@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         val recordedFile = audioRecorder.startRecording()
         if (recordedFile != null) {
             isRecording = true
-            tvStatus.text = getString(R.string.status_collecting_5s)
+            tvStatus.text = getString(R.string.status_collecting_20s)
             rootLayout.setBackgroundColor(Color.parseColor("#F5F5F5"))
             tvStatus.setTextColor(Color.parseColor("#333333"))
             Toast.makeText(this, getString(R.string.toast_start_record), Toast.LENGTH_SHORT).show()
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     tvStatus.text = getString(R.string.status_error_record)
                 }
-            }, 5000)
+            }, 20000)
         }
     }
 

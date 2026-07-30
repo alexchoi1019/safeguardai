@@ -10,7 +10,7 @@
     <string name="risk_score_format">위험도: %1$d%%</string>
     <string name="risk_score_initial">위험도: 0%</string>
     <string name="status_analyzing">🔄 백엔드 AI 분석 중…</string>
-    <string name="status_collecting_5s">🎙️ 음성 수집 중 (5초)…</string>
+    <string name="status_collecting_20s">🎙️ 음성 수집 중 (20초)…</string>
     <string name="status_connection_fail">❌ 서버 연결 실패</string>
     <string name="status_error_record">❌ 녹음 실패</string>
     <string name="status_phishing_heavy">🚨 [경고] 보이스피싱 강력 의심!</string>

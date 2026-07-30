@@ -6,7 +6,7 @@
     <string name="toast_start">탐지를 시작합니다.</string>
     <string name="toast_permission_denied">마이크 권한이 필요합니다.</string>
 
-    <string name="status_collecting_5s">🎙️ 음성 수집 중 (5초)&#8230;</string>
+    <string name="status_collecting_20s">🎙️ 음성 수집 중 (20초)&#8230;</string>
     <string name="status_analyzing">🔄 백엔드 AI 분석 중&#8230;</string>
     <string name="status_error_record">❌ 녹음 실패</string>
     <string name="risk_score_format">위험도: %1$d%%</string>

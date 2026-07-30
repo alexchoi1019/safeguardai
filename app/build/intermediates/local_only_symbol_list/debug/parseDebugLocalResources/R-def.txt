@@ -19,7 +19,7 @@ string dialog_warning_title
 string risk_score_format
 string risk_score_initial
 string status_analyzing
-string status_collecting_5s
+string status_collecting_20s
 string status_connection_fail
 string status_error_record
 string status_phishing_heavy
