@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">safeguardai</string>
+    <string name="status_waiting">보이스피싱 탐지 대기 중</string>
+    <string name="risk_score_initial">위험도: 0%</string>
+    <string name="btn_start_test">실시간 탐지 시작 (테스트)</string>
+    <string name="toast_start">탐지를 시작합니다.</string>
+    <string name="toast_permission_denied">마이크 권한이 필요합니다.</string>
+
+    <string name="status_collecting_20s">🎙️ 음성 수집 중 (20초)&#8230;</string>
+    <string name="status_analyzing">🔄 백엔드 AI 분석 중&#8230;</string>
+    <string name="status_error_record">❌ 녹음 실패</string>
+    <string name="risk_score_format">위험도: %1$d%%</string>
+    <string name="status_phishing_heavy">🚨 [경고] 보이스피싱 강력 의심!</string>
+    <string name="status_suspicious_word">⚠️ [주의] 수상한 단어 감지됨</string>
+    <string name="status_safe_normal">✅ [안전] 정상 대화</string>
+    <string name="status_server_error">❌ 서버 응답 오류: %1$d</string>
+    <string name="status_connection_fail">❌ 서버 연결 실패</string>
+    <string name="toast_start_record">녹음 시작!</string>
+
+    <string name="dialog_warning_title">🚨 보이스피싱 의심 경고</string>
+    <string name="dialog_warning_message">보이스피싱 위험 패턴이 감지되었습니다!\n\n인식된 대화:\n\"%1$s\"</string>
+    <string name="dialog_ok">확인</string>
+</resources>
