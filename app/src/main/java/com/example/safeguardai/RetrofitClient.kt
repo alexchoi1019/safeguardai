@@ -14,11 +14,12 @@ object RetrofitClient {
     private const val BASE_URL = "http://172.30.1.92:8000/" 
 
     val instance: ApiService by lazy {
-        // Whisper 모델의 분석 시간이 길어질 수 있으므로 타임아웃을 60초로 늘립니다.
+        // Whisper 모델의 분석 시간이 길어질 수 있으므로 타임아웃을 충분히 늘립니다. (Day 10 안정화 스펙)
         val okHttpClient = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .callTimeout(150, TimeUnit.SECONDS)
             .build()
 
         val retrofit = Retrofit.Builder()

@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private var isDetecting = false
     private var isRecording = false
     private var isRequesting = false
+    private var continuousErrorCount = 0
 
     private var currentAudioFile: File? = null
 
@@ -168,7 +169,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendAudioToServer(file: File) {
-        if (isRequesting) {
+        if (!isDetecting || isRequesting) {
             file.delete()
             return
         }
@@ -184,30 +185,42 @@ class MainActivity : AppCompatActivity() {
                 file.delete()
 
                 if (response.isSuccessful) {
+                    continuousErrorCount = 0
                     val result = response.body()
                     result?.let {
                         updateRiskUi(it)
                     }
                 } else {
+                    continuousErrorCount++
                     tvStatus.text = getString(R.string.status_server_error, response.code())
                 }
 
                 if (isDetecting) {
-                    startNextRecording()
+                    // 에러가 반복되면 재시도 간격을 조금 늘림
+                    val delay = if (continuousErrorCount > 0) 2000L else 0L
+                    recordingHandler.postDelayed({
+                        startNextRecording()
+                    }, delay)
                 }
             }
 
             override fun onFailure(call: Call<AnalyzeResponse>, t: Throwable) {
                 isRequesting = false
                 file.delete()
+                continuousErrorCount++
 
                 tvStatus.text = getString(R.string.status_connection_fail)
-                Toast.makeText(this@MainActivity, "오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                
+                // 3번 연속 실패 시 토스트로 경고
+                if (continuousErrorCount >= 3) {
+                    Toast.makeText(this@MainActivity, "서버 연결이 불안정합니다. IP와 네트워크를 확인해주세요.", Toast.LENGTH_SHORT).show()
+                }
 
                 if (isDetecting) {
+                    // 실패 시 2초 뒤 재시도
                     recordingHandler.postDelayed({
                         startNextRecording()
-                    }, 1000L)
+                    }, 2000L)
                 }
             }
         })
