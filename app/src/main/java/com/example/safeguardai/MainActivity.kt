@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val RECORD_AUDIO_PERMISSION_CODE = 1000
+        private const val RECORDING_DURATION_MS = 5000L
     }
 
     private lateinit var rootLayout: LinearLayout
@@ -39,7 +40,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnStart: Button
 
     private lateinit var audioRecorder: AudioRecorder
+    private val recordingHandler = Handler(Looper.getMainLooper())
+
+    private var isDetecting = false
     private var isRecording = false
+    private var isRequesting = false
+
+    private var currentAudioFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +60,11 @@ class MainActivity : AppCompatActivity() {
         audioRecorder = AudioRecorder(this)
 
         btnStart.setOnClickListener {
-            checkAudioPermission()
+            if (isDetecting) {
+                stopDetection()
+            } else {
+                checkAudioPermission()
+            }
         }
     }
 
@@ -67,85 +78,172 @@ class MainActivity : AppCompatActivity() {
                 RECORD_AUDIO_PERMISSION_CODE
             )
         } else {
-            startTestRecording()
+            startDetection()
         }
     }
 
-    private fun startTestRecording() {
-        if (isRecording) return
+    private fun startDetection() {
+        if (isDetecting) return
+
+        isDetecting = true
+        btnStart.text = "탐지 중지"
+
+        tvStatus.text = "실시간 탐지를 시작합니다."
+        rootLayout.setBackgroundColor(Color.parseColor("#F5F5F5"))
+        tvStatus.setTextColor(Color.parseColor("#333333"))
+
+        startNextRecording()
+    }
+
+    private fun startNextRecording() {
+        if (!isDetecting || isRecording || isRequesting) {
+            return
+        }
 
         val recordedFile = audioRecorder.startRecording()
-        if (recordedFile != null) {
-            isRecording = true
-            tvStatus.text = getString(R.string.status_collecting_20s)
-            rootLayout.setBackgroundColor(Color.parseColor("#F5F5F5"))
-            tvStatus.setTextColor(Color.parseColor("#333333"))
-            Toast.makeText(this, getString(R.string.toast_start_record), Toast.LENGTH_SHORT).show()
 
-            Handler(Looper.getMainLooper()).postDelayed({
-                val file = audioRecorder.stopRecording()
-                isRecording = false
-                
-                if (file != null && file.exists()) {
-                    tvStatus.text = getString(R.string.status_analyzing)
-                    sendAudioToServer(file)
-                } else {
-                    tvStatus.text = getString(R.string.status_error_record)
-                }
-            }, 20000)
+        if (recordedFile == null) {
+            tvStatus.text = "녹음을 시작하지 못했습니다."
+            stopDetection()
+            return
         }
+
+        currentAudioFile = recordedFile
+        isRecording = true
+
+        tvStatus.text = "통화 내용을 수집하고 있습니다..."
+
+        recordingHandler.postDelayed({
+            finishCurrentRecording()
+        }, RECORDING_DURATION_MS)
+    }
+
+    private fun finishCurrentRecording() {
+        if (!isRecording) {
+            return
+        }
+
+        val file = audioRecorder.stopRecording()
+        isRecording = false
+        currentAudioFile = null
+
+        if (!isDetecting) {
+            file?.delete()
+            return
+        }
+
+        if (file != null && file.exists() && file.length() > 0L) {
+            tvStatus.text = "음성을 분석하고 있습니다..."
+            sendAudioToServer(file)
+        } else {
+            tvStatus.text = "녹음 파일 생성에 실패했습니다."
+
+            recordingHandler.postDelayed({
+                startNextRecording()
+            }, 500L)
+        }
+    }
+
+    private fun stopDetection() {
+        isDetecting = false
+
+        recordingHandler.removeCallbacksAndMessages(null)
+
+        if (isRecording) {
+            val file = audioRecorder.stopRecording()
+            isRecording = false
+            file?.delete()
+        }
+
+        currentAudioFile = null
+
+        btnStart.text = "탐지 시작"
+        tvStatus.text = "탐지가 중지되었습니다."
+
+        Toast.makeText(
+            this,
+            "실시간 탐지를 중지했습니다.",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun sendAudioToServer(file: File) {
+        if (isRequesting) {
+            file.delete()
+            return
+        }
+
+        isRequesting = true
+
         val requestFile = RequestBody.create(MediaType.parse("audio/m4a"), file)
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
         RetrofitClient.instance.analyzeAudio(body).enqueue(object : Callback<AnalyzeResponse> {
             override fun onResponse(call: Call<AnalyzeResponse>, response: Response<AnalyzeResponse>) {
+                isRequesting = false
+                file.delete()
+
                 if (response.isSuccessful) {
                     val result = response.body()
                     result?.let {
-                        val score = it.riskScore
-                        tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
-
-                        // 3단계 위험도별 화면 연출
-                        when {
-                            it.isPhishing || score >= 80 -> {
-                                // 80% 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
-                                rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
-                                tvStatus.text = getString(R.string.status_phishing_heavy)
-                                tvStatus.setTextColor(Color.RED)
-                                tvRiskScore.setTextColor(Color.RED)
-                                
-                                triggerVibration()
-                                showWarningDialog(it.text)
-                            }
-                            score >= 40 -> {
-                                // 40~79%: 주의 (주황 배경)
-                                rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
-                                tvStatus.text = getString(R.string.status_suspicious_word)
-                                tvStatus.setTextColor(Color.parseColor("#E65100"))
-                                tvRiskScore.setTextColor(Color.parseColor("#E65100"))
-                            }
-                            else -> {
-                                // 0~39%: 안전 (초록 배경)
-                                rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
-                                tvStatus.text = getString(R.string.status_safe_normal)
-                                tvStatus.setTextColor(Color.parseColor("#2E7D32"))
-                                tvRiskScore.setTextColor(Color.parseColor("#2E7D32"))
-                            }
-                        }
+                        updateRiskUi(it)
                     }
                 } else {
                     tvStatus.text = getString(R.string.status_server_error, response.code())
                 }
+
+                if (isDetecting) {
+                    startNextRecording()
+                }
             }
 
             override fun onFailure(call: Call<AnalyzeResponse>, t: Throwable) {
+                isRequesting = false
+                file.delete()
+
                 tvStatus.text = getString(R.string.status_connection_fail)
                 Toast.makeText(this@MainActivity, "오류: ${t.message}", Toast.LENGTH_SHORT).show()
+
+                if (isDetecting) {
+                    recordingHandler.postDelayed({
+                        startNextRecording()
+                    }, 1000L)
+                }
             }
         })
+    }
+
+    private fun updateRiskUi(result: AnalyzeResponse) {
+        val score = result.riskScore
+        tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
+
+        // 3단계 위험도별 화면 연출
+        when {
+            result.isPhishing || score >= 80 -> {
+                // 80% 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
+                rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
+                tvStatus.text = getString(R.string.status_phishing_heavy)
+                tvStatus.setTextColor(Color.RED)
+                tvRiskScore.setTextColor(Color.RED)
+
+                triggerVibration()
+                showWarningDialog(result.text)
+            }
+            score >= 40 -> {
+                // 40~79%: 주의 (주황 배경)
+                rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
+                tvStatus.text = getString(R.string.status_suspicious_word)
+                tvStatus.setTextColor(Color.parseColor("#E65100"))
+                tvRiskScore.setTextColor(Color.parseColor("#E65100"))
+            }
+            else -> {
+                // 0~39%: 안전 (초록 배경)
+                rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
+                tvStatus.text = getString(R.string.status_safe_normal)
+                tvStatus.setTextColor(Color.parseColor("#2E7D32"))
+                tvRiskScore.setTextColor(Color.parseColor("#2E7D32"))
+            }
+        }
     }
 
     // 진동 울리기 함수
@@ -183,10 +281,26 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == RECORD_AUDIO_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startTestRecording()
+                startDetection()
             } else {
                 Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    override fun onDestroy() {
+        isDetecting = false
+
+        recordingHandler.removeCallbacksAndMessages(null)
+
+        if (isRecording) {
+            audioRecorder.stopRecording()?.delete()
+            isRecording = false
+        }
+
+        currentAudioFile?.delete()
+        currentAudioFile = null
+
+        super.onDestroy()
     }
 }

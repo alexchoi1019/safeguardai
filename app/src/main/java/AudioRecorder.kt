@@ -13,8 +13,11 @@ class AudioRecorder(private val context: Context) {
 
     // 녹음 시작
     fun startRecording(): File? {
-        // 앱 내부 캐시 폴더에 임시 오디오 파일 생성 (voice_record.m4a)
-        audioFile = File(context.cacheDir, "voice_record.m4a")
+        // 앱 내부 캐시 폴더에 고유한 임시 오디오 파일 생성 (voice_시간값.m4a)
+        audioFile = File(
+            context.cacheDir,
+            "voice_${System.currentTimeMillis()}.m4a"
+        )
 
         mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(context)
