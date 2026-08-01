@@ -1,15 +1,16 @@
 import os
+# Hugging Face 심볼릭 링크 오류 방지 (윈도우 권한 문제 해결)
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+
 import json
 import shutil
 import time
 import imageio_ffmpeg
-import whisper
+from faster_whisper import WhisperModel
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 
-# ... (기존 ffmpeg 설정 생략)
-
-# 1. ffmpeg 경로 동적 등록 (어제 검증된 방식)
+# 1. ffmpeg 경로 동적 등록
 ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
 ffmpeg_dir = os.path.dirname(ffmpeg_exe)
 ffmpeg_alias = os.path.join(ffmpeg_dir, "ffmpeg.exe")
@@ -19,12 +20,13 @@ if not os.path.exists(ffmpeg_alias):
 
 os.environ["PATH"] = ffmpeg_dir + os.pathsep + os.environ.get("PATH", "")
 
-# 2. FastAPI 앱 및 Whisper 모델 초기화
+# 2. FastAPI 앱 및 Faster-Whisper 모델 초기화
 app = FastAPI(title="SafeguardAI Phishing Detection Server")
 
-print("🎙️ Whisper 모델을 로딩 중입니다...")
-stt_model = whisper.load_model("base")
-print("✅ Whisper 모델 로딩 완료!")
+# CPU 환경 최적화를 위해 compute_type="int8" 사용
+print("🎙️ Faster-Whisper 모델(small)을 로딩 중입니다...")
+stt_model = WhisperModel("small", device="cpu", compute_type="int8")
+print("✅ Faster-Whisper 모델 로딩 완료!")
 
 # 3. 키워드 데이터셋 로드
 KEYWORDS_PATH = os.path.join(os.path.dirname(__file__), "keywords.json")
@@ -33,24 +35,23 @@ if os.path.exists(KEYWORDS_PATH):
     with open(KEYWORDS_PATH, "r", encoding="utf-8") as f:
         keywords_data = json.load(f)
 
-# 4. 간단한 위험도 산출 함수 (키워드 매칭 기반 기초 알고리즘)
+# 4. 간단한 위험도 산출 함수
 def calculate_risk_score(text: str) -> float:
     score = 0.0
     
     # 키워드 범주별 가중치 설정
     for word in keywords_data.get("institution", []):
         if word in text:
-            score += 25.0  # 기관 사칭 단어
+            score += 25.0
             
     for word in keywords_data.get("crime_words", []):
         if word in text:
-            score += 30.0  # 범죄 관련 단어
+            score += 30.0
             
     for word in keywords_data.get("money_words", []):
         if word in text:
-            score += 35.0  # 금전 이체 요구 단어
+            score += 35.0
             
-    # 최대 100점으로 제한
     return min(score, 100.0)
 
 # 5. 음성 분석 API 엔드포인트
@@ -64,16 +65,21 @@ async def analyze_audio(file: UploadFile = File(...)):
     with open(temp_file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    save_time = time.time()
-
     try:
-        # STT 실행 (CPU 환경 안정성을 위해 fp16=False 설정)
-        print("🎙️ Whisper STT 분석 시작...")
+        # STT 실행
+        print("🎙️ Faster-Whisper 분석 시작...")
         stt_start_time = time.time()
-        result = stt_model.transcribe(temp_file_path, language="ko", fp16=False)
+
+        # beam_size=5는 정확도와 속도의 균형을 맞춘 설정입니다.
+        segments, info = stt_model.transcribe(temp_file_path, beam_size=5, language="ko")
+
+        transcribed_text = ""
+        for segment in segments:
+            transcribed_text += segment.text
+
         stt_end_time = time.time()
 
-        transcribed_text = result.get("text", "").strip()
+        transcribed_text = transcribed_text.strip()
         stt_duration = stt_end_time - stt_start_time
         print(f"✅ STT 완료 ({stt_duration:.2f}초): {transcribed_text[:50]}...")
 

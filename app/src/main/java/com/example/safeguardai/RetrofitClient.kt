@@ -11,7 +11,7 @@ object RetrofitClient {
      * 1. 안드로이드 에뮬레이터 사용 시: "http://10.0.2.2:8000/"
      * 2. 실물 기기(폰) 사용 시: "http://PC의_IP주소:8000/" (PC와 폰이 같은 Wi-Fi에 연결되어야 함)
      */
-    private const val BASE_URL = "http://172.30.1.92:8000/" 
+    private const val BASE_URL = "http://192.168.0.132:8000/" 
 
     val instance: ApiService by lazy {
         // Whisper 모델의 분석 시간이 길어질 수 있으므로 타임아웃을 충분히 늘립니다. (Day 10 안정화 스펙)
