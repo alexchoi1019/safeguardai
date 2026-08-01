@@ -35,22 +35,29 @@ if os.path.exists(KEYWORDS_PATH):
     with open(KEYWORDS_PATH, "r", encoding="utf-8") as f:
         keywords_data = json.load(f)
 
-# 4. 간단한 위험도 산출 함수
+# 4. 간단한 위험도 산출 함수 (키워드 매칭 기반 알고리즘)
 def calculate_risk_score(text: str) -> float:
     score = 0.0
     
-    # 키워드 범주별 가중치 설정
-    for word in keywords_data.get("institution", []):
-        if word in text:
-            score += 25.0
-            
-    for word in keywords_data.get("crime_words", []):
-        if word in text:
-            score += 30.0
-            
-    for word in keywords_data.get("money_words", []):
-        if word in text:
-            score += 35.0
+    # 카테고리별 가중치 설정
+    weights = {
+        "institution": 25.0,    # 기관 사칭
+        "crime_words": 30.0,    # 범죄 관련
+        "money_words": 35.0,    # 금전 요구
+        "technology_words": 30.0, # 원격제어/악성앱
+        "urgency_words": 15.0,   # 시급성 강조
+        "threat_words": 25.0,    # 협박/법적 책임
+        "authority_words": 20.0, # 권위 사칭/비밀유지
+        "loan_scam_words": 30.0, # 대출 사기
+        "messenger_words": 15.0  # 메신저 유도/지인 사칭
+    }
+
+    # 각 카테고리별로 단어 포함 여부 확인
+    for category, weight in weights.items():
+        for word in keywords_data.get(category, []):
+            if word in text:
+                score += weight
+                break  # 한 카테고리에서 여러 단어가 나와도 해당 카테고리 점수는 한 번만 합산 (중복 방지)
             
     return min(score, 100.0)
 
