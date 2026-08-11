@@ -28,6 +28,47 @@
         android:textColor="#4CAF50"
         android:layout_marginTop="20dp" />
 
+    <TextView
+        android:id="@+id/tvReasonTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/reason_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginTop="30dp" />
+
+    <TextView
+        android:id="@+id/tvReasons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/reason_empty"
+        android:textSize="18sp"
+        android:textColor="#555555"
+        android:lineSpacingExtra="6dp"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tvActionTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginTop="30dp" />
+
+    <TextView
+        android:id="@+id/tvActions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_empty"
+        android:textSize="18sp"
+        android:textColor="#1976D2"
+        android:textStyle="bold"
+        android:lineSpacingExtra="6dp"
+        android:layout_marginTop="10dp" />
+
     <Button
         android:id="@+id/btnStart"
         android:layout_width="match_parent"

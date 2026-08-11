@@ -20,4 +20,10 @@
     <string name="dialog_warning_title">🚨 보이스피싱 의심 경고</string>
     <string name="dialog_warning_message">보이스피싱 위험 패턴이 감지되었습니다!\n\n인식된 대화:\n\"%1$s\"</string>
     <string name="dialog_ok">확인</string>
+
+    <string name="reason_title">왜 위험한가요?</string>
+    <string name="reason_empty">현재 감지된 위험 요소가 없습니다.</string>
+
+    <string name="action_title">지금 어떻게 해야 하나요?</string>
+    <string name="action_empty">정상적인 대화로 보입니다.</string>
 </resources>

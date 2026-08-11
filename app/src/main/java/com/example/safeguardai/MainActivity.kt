@@ -37,6 +37,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rootLayout: LinearLayout
     private lateinit var tvStatus: TextView
     private lateinit var tvRiskScore: TextView
+    private lateinit var tvReasons: TextView
+    private lateinit var tvActions: TextView
     private lateinit var btnStart: Button
 
     private lateinit var audioRecorder: AudioRecorder
@@ -56,6 +58,8 @@ class MainActivity : AppCompatActivity() {
         rootLayout = findViewById(R.id.rootLayout)
         tvStatus = findViewById(R.id.tvStatus)
         tvRiskScore = findViewById(R.id.tvRiskScore)
+        tvReasons = findViewById(R.id.tvReasons)
+        tvActions = findViewById(R.id.tvActions)
         btnStart = findViewById(R.id.btnStart)
 
         audioRecorder = AudioRecorder(this)
@@ -229,6 +233,22 @@ class MainActivity : AppCompatActivity() {
     private fun updateRiskUi(result: AnalyzeResponse) {
         val score = result.riskScore
         tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
+
+        // 탐지 근거 표시
+        if (result.reasons.isNotEmpty()) {
+            val reasonText = result.reasons.joinToString(separator = "\n") { "• $it" }
+            tvReasons.text = reasonText
+        } else {
+            tvReasons.text = getString(R.string.reason_empty)
+        }
+
+        // 행동 지침 표시
+        if (result.actions.isNotEmpty()) {
+            val actionText = result.actions.joinToString(separator = "\n") { "• $it" }
+            tvActions.text = actionText
+        } else {
+            tvActions.text = getString(R.string.action_empty)
+        }
 
         // 3단계 위험도별 화면 연출
         when {
