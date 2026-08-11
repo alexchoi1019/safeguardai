@@ -2,11 +2,15 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <string name="action_empty">정상적인 대화로 보입니다.</string>
+    <string name="action_title">지금 어떻게 해야 하나요?</string>
     <string name="app_name">safeguardai</string>
     <string name="btn_start_test">실시간 탐지 시작 (테스트)</string>
     <string name="dialog_ok">확인</string>
     <string name="dialog_warning_message">보이스피싱 위험 패턴이 감지되었습니다!\n\n인식된 대화:\n\"%1$s\"</string>
     <string name="dialog_warning_title">🚨 보이스피싱 의심 경고</string>
+    <string name="reason_empty">현재 감지된 위험 요소가 없습니다.</string>
+    <string name="reason_title">왜 위험한가요?</string>
     <string name="risk_score_format">위험도: %1$d%%</string>
     <string name="risk_score_initial">위험도: 0%</string>
     <string name="status_analyzing">🔄 백엔드 AI 분석 중…</string>

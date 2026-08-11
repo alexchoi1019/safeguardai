@@ -3574,6 +3574,10 @@ int id transition_position 0x7f0801db
 int id transition_scene_layoutid_cache 0x7f0801dc
 int id transition_transform 0x7f0801dd
 int id triangle 0x7f0801de
+int id tvActionTitle 0x7f0801f8
+int id tvActions 0x7f0801f9
+int id tvReasonTitle 0x7f0801fa
+int id tvReasons 0x7f0801fb
 int id tvRiskScore 0x7f0801df
 int id tvStatus 0x7f0801e0
 int id unchecked 0x7f0801e1
@@ -3823,6 +3827,8 @@ int string abc_searchview_description_voice 0x7f0f0017
 int string abc_shareactionprovider_share_with 0x7f0f0018
 int string abc_shareactionprovider_share_with_application 0x7f0f0019
 int string abc_toolbar_collapse_description 0x7f0f001a
+int string action_empty 0x7f0f00b9
+int string action_title 0x7f0f00ba
 int string androidx_startup 0x7f0f001b
 int string app_name 0x7f0f001c
 int string appbar_scrolling_view_behavior 0x7f0f001d
@@ -3960,6 +3966,8 @@ int string path_password_eye 0x7f0f00a0
 int string path_password_eye_mask_strike_through 0x7f0f00a1
 int string path_password_eye_mask_visible 0x7f0f00a2
 int string path_password_strike_through 0x7f0f00a3
+int string reason_empty 0x7f0f00bb
+int string reason_title 0x7f0f00bc
 int string risk_score_format 0x7f0f00a4
 int string risk_score_initial 0x7f0f00a5
 int string search_menu_title 0x7f0f00a6

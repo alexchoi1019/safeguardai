@@ -1,31 +1,39 @@
 [
     {
-        "merged": "com.example.safeguardai.app-debug-31:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/drawable_ic_launcher_background.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/drawable/ic_launcher_background.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\layout-land_activity_main.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\layout-land\\activity_main.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/drawable/ic_launcher_foreground.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\xml\\data_extraction_rules.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/xml_data_extraction_rules.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/xml/data_extraction_rules.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\drawable\\ic_launcher_background.xml"
     },
     {
         "merged": "com.example.safeguardai.app-debug-31:/layout_activity_main.xml.flat",
         "source": "com.example.safeguardai.app-main-33:/layout/activity_main.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\layout\\activity_main.xml"
     },
     {
-        "merged": "com.example.safeguardai.app-debug-31:/xml_backup_rules.xml.flat",
-        "source": "com.example.safeguardai.app-main-33:/xml/backup_rules.xml"
+        "merged": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-debug-31:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\winne\\.gradle\\daemon\\9.5.0\\com.example.safeguardai.app-main-33:\\drawable\\ic_launcher_foreground.xml"
     },
     {
         "merged": "com.example.safeguardai.app-debug-31:/layout-land_activity_main.xml.flat",

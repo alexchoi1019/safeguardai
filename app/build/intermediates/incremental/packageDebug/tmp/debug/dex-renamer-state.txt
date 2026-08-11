@@ -1,4 +1,4 @@
-#Sat Aug 01 13:02:58 KST 2026
+#Tue Aug 11 21:43:30 KST 2026
 base.0=C\:\\Users\\winne\\OneDrive\\문서\\GitHub\\safeguardai\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\winne\\OneDrive\\문서\\GitHub\\safeguardai\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.2=C\:\\Users\\winne\\OneDrive\\문서\\GitHub\\safeguardai\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\9\\classes.dex
