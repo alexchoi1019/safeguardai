@@ -27,11 +27,18 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 
+enum class RiskLevel {
+    SAFE,
+    WARNING,
+    DANGER
+}
+
 class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val RECORD_AUDIO_PERMISSION_CODE = 1000
         private const val RECORDING_DURATION_MS = 5000L
+        private const val MAX_RISK_HISTORY = 3
     }
 
     private lateinit var rootLayout: LinearLayout
@@ -50,6 +57,11 @@ class MainActivity : AppCompatActivity() {
     private var continuousErrorCount = 0
 
     private var currentAudioFile: File? = null
+
+    private val recentRiskFactors = ArrayDeque<List<RiskFactor>>()
+    private val accumulatedReasons = linkedSetOf<String>()
+    private val accumulatedActions = linkedSetOf<String>()
+    private var previousRiskLevel = RiskLevel.SAFE
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +101,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun startDetection() {
         if (isDetecting) return
+
+        // 상태 초기화
+        recentRiskFactors.clear()
+        accumulatedReasons.clear()
+        accumulatedActions.clear()
+        previousRiskLevel = RiskLevel.SAFE
+        continuousErrorCount = 0
 
         isDetecting = true
         btnStart.text = "탐지 중지"
@@ -215,9 +234,9 @@ class MainActivity : AppCompatActivity() {
 
                 tvStatus.text = getString(R.string.status_connection_fail)
                 
-                // 3번 연속 실패 시 토스트로 경고
-                if (continuousErrorCount >= 3) {
-                    Toast.makeText(this@MainActivity, "서버 연결이 불안정합니다. IP와 네트워크를 확인해주세요.", Toast.LENGTH_SHORT).show()
+                // 3번 연속 실패 시 토스트로 경고 (사용자 경험 개선)
+                if (continuousErrorCount == 3) {
+                    Toast.makeText(this@MainActivity, "서버 연결이 불안정합니다. IP와 Wi-Fi를 확인해주세요.", Toast.LENGTH_LONG).show()
                 }
 
                 if (isDetecting) {
@@ -231,51 +250,89 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateRiskUi(result: AnalyzeResponse) {
-        val score = result.riskScore
+        val instantScore = result.riskScore
+        val cumulativeScore = calculateCumulativeRisk(result.riskFactors)
+        
+        // 실시간 점수와 누적 점수 중 더 높은 것을 사용
+        val score = maxOf(instantScore, cumulativeScore)
+        val currentRiskLevel = getRiskLevel(score)
+
         tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
 
-        // 탐지 근거 표시
-        if (result.reasons.isNotEmpty()) {
-            val reasonText = result.reasons.joinToString(separator = "\n") { "• $it" }
+        // 탐지 근거 누적 및 표시
+        accumulatedReasons.addAll(result.reasons)
+        if (accumulatedReasons.isNotEmpty()) {
+            val reasonText = accumulatedReasons.joinToString(separator = "\n") { "• $it" }
             tvReasons.text = reasonText
         } else {
             tvReasons.text = getString(R.string.reason_empty)
         }
 
-        // 행동 지침 표시
-        if (result.actions.isNotEmpty()) {
-            val actionText = result.actions.joinToString(separator = "\n") { "• $it" }
+        // 행동 지침 누적 및 표시
+        accumulatedActions.addAll(result.actions)
+        if (accumulatedActions.isNotEmpty()) {
+            val actionText = accumulatedActions.joinToString(separator = "\n") { "• $it" }
             tvActions.text = actionText
         } else {
             tvActions.text = getString(R.string.action_empty)
         }
 
         // 3단계 위험도별 화면 연출
-        when {
-            result.isPhishing || score >= 80 -> {
+        when (currentRiskLevel) {
+            RiskLevel.DANGER -> {
                 // 80% 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
                 rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
                 tvStatus.text = getString(R.string.status_phishing_heavy)
                 tvStatus.setTextColor(Color.RED)
                 tvRiskScore.setTextColor(Color.RED)
 
-                triggerVibration()
-                showWarningDialog(result.text)
+                // 최초 DANGER 진입 시에만 알림 발생 (피드백 안정화)
+                if (previousRiskLevel != RiskLevel.DANGER) {
+                    triggerVibration()
+                    showWarningDialog(result.text)
+                }
             }
-            score >= 40 -> {
+            RiskLevel.WARNING -> {
                 // 40~79%: 주의 (주황 배경)
                 rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
                 tvStatus.text = getString(R.string.status_suspicious_word)
                 tvStatus.setTextColor(Color.parseColor("#E65100"))
                 tvRiskScore.setTextColor(Color.parseColor("#E65100"))
             }
-            else -> {
+            RiskLevel.SAFE -> {
                 // 0~39%: 안전 (초록 배경)
                 rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
                 tvStatus.text = getString(R.string.status_safe_normal)
                 tvStatus.setTextColor(Color.parseColor("#2E7D32"))
                 tvRiskScore.setTextColor(Color.parseColor("#2E7D32"))
             }
+        }
+        
+        previousRiskLevel = currentRiskLevel
+    }
+
+    private fun calculateCumulativeRisk(newFactors: List<RiskFactor>): Float {
+        recentRiskFactors.addLast(newFactors)
+        if (recentRiskFactors.size > MAX_RISK_HISTORY) {
+            recentRiskFactors.removeFirst()
+        }
+
+        val uniqueFactors = mutableMapOf<String, Float>()
+        for (factorList in recentRiskFactors) {
+            for (factor in factorList) {
+                // 각 카테고리별 최대 점수를 유지하여 중복 합산 방지
+                uniqueFactors[factor.category] = maxOf(uniqueFactors[factor.category] ?: 0f, factor.score)
+            }
+        }
+
+        return uniqueFactors.values.sum().coerceAtMost(100f)
+    }
+
+    private fun getRiskLevel(score: Float): RiskLevel {
+        return when {
+            score >= 80 -> RiskLevel.DANGER
+            score >= 40 -> RiskLevel.WARNING
+            else -> RiskLevel.SAFE
         }
     }
 

@@ -67,6 +67,7 @@ def analyze_risk(text: str):
     detected_keywords = []
     reasons = []
     actions = []
+    risk_factors = []
 
     # 카테고리별 행동 지침 매핑
     action_map = {
@@ -89,9 +90,17 @@ def analyze_risk(text: str):
 
         if matched_words:
             score += weight
-            detected_categories.append(category_labels.get(category, category))
+            label = category_labels.get(category, category)
+            detected_categories.append(label)
             detected_keywords.extend(matched_words)
-            reasons.append(f"{category_labels.get(category, category)} 관련 표현이 감지되었습니다.")
+            reasons.append(f"{label} 관련 표현이 감지되었습니다.")
+
+            # 누적 위험도 계산을 위한 상세 요인 추가
+            risk_factors.append({
+                "category": category,
+                "label": label,
+                "score": weight
+            })
 
             # 해당 카테고리에 맞는 행동 지침 추가
             if category in action_map:
@@ -106,14 +115,15 @@ def analyze_risk(text: str):
         "detected_categories": detected_categories,
         "detected_keywords": list(set(detected_keywords)),
         "reasons": reasons,
-        "actions": list(dict.fromkeys(actions))  # 순서 유지하며 중복 제거
+        "actions": list(dict.fromkeys(actions)),  # 순서 유지하며 중복 제거
+        "risk_factors": risk_factors
     }
 
 # 5. 음성 분석 API 엔드포인트
 @app.post("/analyze-audio")
 async def analyze_audio(file: UploadFile = File(...)):
     start_time = time.time()
-    print(f"\n[Request] 음성 분석 요청 수신: {file.filename}")
+    print(f"\n[Request] 음성 분석 요청 수수료: {file.filename}")
 
     # 수신받은 임시 음성 파일 저장
     temp_file_path = f"temp_{file.filename}"
@@ -155,6 +165,7 @@ async def analyze_audio(file: UploadFile = File(...)):
             "detected_keywords": risk_result["detected_keywords"],
             "reasons": risk_result["reasons"],
             "actions": risk_result["actions"],
+            "risk_factors": risk_result["risk_factors"],
             "processing_time": round(total_duration, 2)
         }
 
