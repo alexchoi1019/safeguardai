@@ -1,50 +1,35 @@
-# Risk Analysis Refinement: Context Patterns & Threshold Synchronization
+# SafeguardAI: Cumulative Risk Sync & New Validation Set
 
-This plan addresses the 4 failed test cases (N15, P6, P12, P19) by implementing context-aware rules in the backend and synchronizing the risk thresholds between the Android app and the backend.
+This plan aims to synchronize the "Context Bonus" logic with the Android application's cumulative risk mechanism and introduce a new set of 25 scenarios for unbiased validation.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> The thresholds will be lowered to **WARNING: 35+** and **DANGER: 70+** across both the Android app and the Backend.
->
-> **Key Logic Additions:**
-> - **Safe Context Exception:** Reduces score for "Technology" keywords if safe words like "Company" or "Announcement" are present.
-> - **Urgency Pressure Bonus:** Adds 20 points when urgency is combined with pressure words like "Big trouble" or "Stop account".
-> - **Family Impersonation Bonus:** Adds 50 points when family terms, phone problems, and money requests occur together.
+> - **Risk Factor Synchronization:** "Context Bonuses" (e.g., Family Impersonation, Urgency Pressure) will now be included in the `risk_factors` list returned by the backend. This ensures the Android app's cumulative risk calculation correctly accounts for these bonuses across multiple segments.
+> - **New Validation Set:** 25 entirely new scenarios (10 Normal, 15 Phishing) will be generated to test the generalization of the current detection logic.
 
 ## Proposed Changes
-
-### Android Application
-
-#### [MODIFY] [MainActivity.kt](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/app/src/main/java/com/example/safeguardai/MainActivity.kt)
-- Update `getRiskLevel` thresholds to `35` (WARNING) and `70` (DANGER).
-- Update `updateRiskUi` comments and logic to reflect the new thresholds.
 
 ### Backend Logic
 
 #### [MODIFY] [main.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/main.py)
-- Refactor `analyze_risk` to integrate context-based scoring rules.
-- Implement `calculate_context_rules` (or similar) to handle specific patterns (Urgency + Pressure, Family + Money).
-- Add exception logic for safe contexts (e.g., corporate announcements).
-- Ensure final score is clamped between 0 and 100.
-- Update `is_phishing` threshold to `70.0`.
-
-### Data & Configuration
-
-#### [MODIFY] [keywords.json](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/keywords.json)
-- Add missing specific phrases to ensure the new context rules trigger correctly (e.g., "입금하지 않으면", "승인이 취소", "돈 좀 보내줘").
-
-### Testing
+- Refactor `calculate_context_bonus` to return `context_factors` (list of dicts with category, label, and score).
+- Update `analyze_risk` to extend the `risk_factors` list with these new context-based factors.
+- Ensure the Android app receives these factors in the JSON response.
 
 #### [MODIFY] [test_suite.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/test_suite.py)
-- Synchronize logic and thresholds with `main.py`.
-- Update the expected result for **P19** from `WARNING` to `DANGER` as it represents a high-risk pattern.
+- Sync the `analyze_risk_detailed` logic with the updated `main.py`.
+- Add a new "Validation Set" containing 25 new scenarios:
+    - **10 Normal:** Daily life, official banking queries, real security alerts, etc.
+    - **15 Phishing:** Variations of impersonation (government, logistics, family), investment scams, and remote access lures.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run `test_suite.py` to verify the 35 scenarios.
-- Expected target: **35/35 (100%)** accuracy on the development set.
+- Run the updated `test_suite.py` against both the **Training Set (35 scenarios)** and the **Validation Set (25 scenarios)**.
+- **Success Criteria:**
+    - Training Set: Maintain 100% accuracy.
+    - Validation Set: Achieve >80% accuracy without further code tweaks.
 
 ### Manual Verification
-- Deploy to Android and verify that the UI colors and status messages reflect the new thresholds (35/70).
+- Verify the backend JSON response via a tool like Postman or by logging to ensure `risk_factors` now contains items like `family_impersonation_pattern`.

@@ -1,8 +1,7 @@
-- `[x]` Risk Analysis Refinement
-    - `[x]` Update Android thresholds in `MainActivity.kt`
-    - `[x]` Refine `keywords.json` for context rules
-    - `[x]` Implement context rules in `main.py`
-    - `[x]` Synchronize and update `test_suite.py`
+- `[x]` Cumulative Risk Sync & Validation
+    - `[x]` Synchronize Context Bonuses with `risk_factors` in `main.py`
+    - `[x]` Sync `test_suite.py` logic with `main.py` updates
+    - `[x]` Create and add New Validation Set (25 scenarios) to `test_suite.py`
 - `[x]` Verification
-    - `[x]` Run 35-scenario test suite
-    - `[x]` Verify 100% pass rate
+    - `[x]` Run test suite on both Training and Validation sets
+    - `[x]` Analyze generalization performance

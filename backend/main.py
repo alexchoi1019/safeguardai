@@ -40,6 +40,7 @@ def calculate_context_bonus(text: str, keywords_data: dict):
     bonus = 0.0
     reasons = []
     actions = []
+    context_factors = []
 
     # 1. 긴급 압박 (긴급성 + 불이익 표현)
     urgency_trigger_words = keywords_data.get("urgency_words", [])
@@ -50,8 +51,14 @@ def calculate_context_bonus(text: str, keywords_data: dict):
 
     if has_urgency and has_pressure:
         bonus += 20.0
+        label = "긴급 행동 압박"
         reasons.append("즉시 행동하지 않으면 문제가 생긴다고 압박하는 표현이 감지되었습니다.")
         actions.append("상대방의 독촉에 따르지 말고 전화를 끊은 뒤 내용을 다시 확인하세요.")
+        context_factors.append({
+            "category": "urgent_pressure_pattern",
+            "label": label,
+            "score": 20.0
+        })
 
     # 2. 지인 사칭 고위험 패턴 (가족 + 휴대폰 문제 + 송금 요구)
     family_words = ["엄마", "아빠", "아들", "딸", "형", "누나", "언니", "오빠"]
@@ -64,10 +71,16 @@ def calculate_context_bonus(text: str, keywords_data: dict):
 
     if has_family and has_phone_problem and has_money_request:
         bonus += 50.0
+        label = "가족 사칭 송금 요구 패턴"
         reasons.append("가족을 사칭하면서 휴대폰 문제를 이유로 송금을 요구하는 전형적인 지인 사칭 패턴이 감지되었습니다.")
         actions.append("돈을 보내지 말고 기존에 알고 있던 가족의 전화번호로 직접 연락해 본인인지 확인하세요.")
+        context_factors.append({
+            "category": "family_impersonation_pattern",
+            "label": label,
+            "score": 50.0
+        })
 
-    return bonus, reasons, actions
+    return bonus, reasons, actions, context_factors
 
 def analyze_risk(text: str):
     score = 0.0
@@ -156,10 +169,11 @@ def analyze_risk(text: str):
         actions = [a for a in actions if "원격 제어 앱" not in a]
 
     # 2. 문맥 기반 보너스 (P6, P12, P19 대응)
-    context_bonus, context_reasons, context_actions = calculate_context_bonus(text, keywords_data)
+    context_bonus, context_reasons, context_actions, context_factors = calculate_context_bonus(text, keywords_data)
     score += context_bonus
     reasons.extend(context_reasons)
     actions.extend(context_actions)
+    risk_factors.extend(context_factors)
 
     # 위험도가 높을 경우 기본 행동 지침 추가
     if score >= 35 and not actions:
