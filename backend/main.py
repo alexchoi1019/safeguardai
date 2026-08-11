@@ -62,8 +62,14 @@ def calculate_context_bonus(text: str, keywords_data: dict):
 
     # 2. 지인 사칭 고위험 패턴 (가족 + 휴대폰 문제 + 송금 요구)
     family_words = ["엄마", "아빠", "아들", "딸", "형", "누나", "언니", "오빠"]
-    phone_problem_words = ["휴대폰 고장", "폰 고장", "폰이 망가", "휴대폰이 망가", "다른 번호", "번호가 바뀌"]
-    money_request_words = ["돈 좀 보내", "돈 보내", "송금해", "입금해", "계좌로", "보내줘"]
+    phone_problem_words = [
+        "휴대폰 고장", "폰 고장", "폰이 망가", "휴대폰이 망가",
+        "액정이 깨져", "액정 깨져", "다른 번호", "친구 번호", "번호 바뀌"
+    ]
+    money_request_words = [
+        "돈 좀 보내", "돈 보내", "송금해", "입금해", "계좌로", "보내줘",
+        "결제", "대신 보내", "계좌로 부탁"
+    ]
 
     has_family = any(word in text for word in family_words)
     has_phone_problem = any(word in text for word in phone_problem_words)
@@ -81,6 +87,67 @@ def calculate_context_bonus(text: str, keywords_data: dict):
         })
 
     return bonus, reasons, actions, context_factors
+
+def calculate_combination_bonus(text: str):
+    bonus = 0.0
+    reasons = []
+    actions = []
+    factors = []
+
+    # 1. 대출 + 선입금 요구 (대출 사기)
+    loan_words = ["대출", "대출 승인", "저금리", "대환"]
+    advance_payment_words = ["보증료", "수수료", "선입금", "비용을 보내", "먼저 입금", "보증보험료"]
+
+    if any(word in text for word in loan_words) and any(word in text for word in advance_payment_words):
+        bonus += 40.0
+        label = "대출 선입금 요구 패턴"
+        reasons.append("대출을 조건으로 먼저 돈(수수료, 보증료 등)을 요구하는 전형적인 대출 사기 패턴이 감지되었습니다.")
+        actions.append("대출 실행 전 수수료나 보증료를 송금하지 마세요. 이는 명백한 불법 사기입니다.")
+        factors.append({
+            "category": "loan_advance_payment_pattern",
+            "label": label,
+            "score": 40.0
+        })
+
+    # 2. 범죄 연루 + 체포/법적 위협
+    crime_accusation = ["사건에 연루", "범죄에 연루", "수사 대상", "범죄에 사용"]
+    legal_threats = ["체포", "구속", "법적 조치", "절차가 진행", "형사처벌"]
+
+    if any(word in text for word in crime_accusation) and any(word in text for word in legal_threats):
+        bonus += 20.0
+        label = "범죄 연루 협박 패턴"
+        reasons.append("범죄 연루를 주장하면서 체포나 법적 조치를 언급하며 심리적으로 압박하는 패턴이 감지되었습니다.")
+        factors.append({
+            "category": "crime_threat_pattern",
+            "label": label,
+            "score": 20.0
+        })
+
+    return bonus, reasons, actions, factors
+
+def apply_safe_context_adjustment(text: str, score: float):
+    reduction = 0.0
+
+    # 1. 뉴스/보도 문맥 (VN2, VN10 대응)
+    news_words = ["뉴스", "기사", "보도", "봤어", "나왔어", "발표됐"]
+    if any(word in text for word in news_words):
+        reduction += 40.0 # 상향 (30 -> 40)
+
+    # 2. 정상적인 개인 송금/납부 문맥 (VN3, VN6 대응)
+    normal_payment_patterns = [
+        ["카드값", "계좌이체"],
+        ["병원비", "보내"],
+        ["밥값", "보내"],
+        ["공과금", "이체"],
+        ["관리비", "확인"]
+    ]
+
+    for pattern in normal_payment_patterns:
+        if all(word in text for word in pattern):
+            reduction += 40.0
+            break # 중복 감쇄 방지
+
+    return max(score - reduction, 0.0)
 
 def analyze_risk(text: str):
     score = 0.0
@@ -129,6 +196,7 @@ def analyze_risk(text: str):
         "messenger_words": "가족이나 지인을 사칭한 메시지라면, 반드시 본인과 직접 통화하여 확인하세요."
     }
 
+    # 1. 기본 키워드 기반 점수 계산
     for category, weight in weights.items():
         matched_words = []
         for word in keywords_data.get(category, []):
@@ -153,27 +221,32 @@ def analyze_risk(text: str):
             if category in action_map:
                 actions.append(action_map[category])
 
-    # --- 문맥 기반 추가 분석 (N15, P6, P12, P19 대응) ---
-
-    # 1. 정상적인 앱 설치 문맥에 대한 오탐 완화 (N15 대응)
-    safe_context_patterns = [
-        ["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"], ["공식", "앱스토어"]
+    # 2. 오탐 완화 (N15 대응: 공식 설치 문맥)
+    safe_install_patterns = [
+        ["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"],
+        ["공식", "앱스토어"], ["공식", "홈페이지"]
     ]
-    safe_technology_context = any(all(word in text for word in pattern) for pattern in safe_context_patterns)
+    is_safe_install = any(all(word in text for word in pattern) for pattern in safe_install_patterns)
 
-    if safe_technology_context and "앱 설치 또는 원격제어 요구" in detected_categories:
+    if is_safe_install and "앱 설치 또는 원격제어 요구" in detected_categories:
         score -= weights["technology_words"]
+        # 리스트 정리
         detected_categories = [c for c in detected_categories if c != "앱 설치 또는 원격제어 요구"]
         risk_factors = [f for f in risk_factors if f["category"] != "technology_words"]
         reasons = [r for r in reasons if "앱 설치 또는 원격제어" not in r]
         actions = [a for a in actions if "원격 제어 앱" not in a]
 
-    # 2. 문맥 기반 보너스 (P6, P12, P19 대응)
-    context_bonus, context_reasons, context_actions, context_factors = calculate_context_bonus(text, keywords_data)
-    score += context_bonus
-    reasons.extend(context_reasons)
-    actions.extend(context_actions)
-    risk_factors.extend(context_factors)
+    # 3. 문맥 기반 보너스 (P6, P12, P19, VP8, VP9, VP11 등 대응)
+    context_bonus, c_reasons, c_actions, c_factors = calculate_context_bonus(text, keywords_data)
+    combo_bonus, combo_reasons, combo_actions, combo_factors = calculate_combination_bonus(text)
+
+    score += (context_bonus + combo_bonus)
+    reasons.extend(c_reasons + combo_reasons)
+    actions.extend(c_actions + combo_actions)
+    risk_factors.extend(c_factors + combo_factors)
+
+    # 4. 최종 문맥 보정 (뉴스, 일상 거래 등 감쇄)
+    score = apply_safe_context_adjustment(text, score)
 
     # 위험도가 높을 경우 기본 행동 지침 추가
     if score >= 35 and not actions:

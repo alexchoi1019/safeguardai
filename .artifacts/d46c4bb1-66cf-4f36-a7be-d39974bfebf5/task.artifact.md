@@ -1,7 +1,10 @@
-- `[x]` Cumulative Risk Sync & Validation
-    - `[x]` Synchronize Context Bonuses with `risk_factors` in `main.py`
-    - `[x]` Sync `test_suite.py` logic with `main.py` updates
-    - `[x]` Create and add New Validation Set (25 scenarios) to `test_suite.py`
-- `[x]` Verification
-    - `[x]` Run test suite on both Training and Validation sets
-    - `[x]` Analyze generalization performance
+- `[/]` Detection Engine Refinement (Context & Patterns)
+    - `[ ]` Expand `keywords.json` dictionary
+    - `[ ]` Implement Safe Context Adjustment in `main.py`
+    - `[ ]` Implement Behavioral Combination Bonuses in `main.py`
+    - `[ ]` Refine Family Impersonation pattern in `main.py`
+    - `[ ]` Integrate all layers in `analyze_risk`
+    - `[ ]` Synchronize `test_suite.py`
+- `[ ]` Verification
+    - `[ ]` Run test suite (Training + 2nd Blind = 60 scenarios)
+    - `[ ]` Goal: >90% overall accuracy
