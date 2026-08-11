@@ -1,10 +1,8 @@
-- `[/]` Detection Engine Refinement (Context & Patterns)
-    - `[ ]` Expand `keywords.json` dictionary
-    - `[ ]` Implement Safe Context Adjustment in `main.py`
-    - `[ ]` Implement Behavioral Combination Bonuses in `main.py`
-    - `[ ]` Refine Family Impersonation pattern in `main.py`
-    - `[ ]` Integrate all layers in `analyze_risk`
-    - `[ ]` Synchronize `test_suite.py`
-- `[ ]` Verification
-    - `[ ]` Run test suite (Training + 2nd Blind = 60 scenarios)
-    - `[ ]` Goal: >90% overall accuracy
+- `[x]` Day 2: Final Engine Polish
+    - `[x]` Update `keywords.json` with missing phrases
+    - `[x]` Update `main.py` with refined context and combination rules
+    - `[x]` Sync `test_suite.py` with backend logic
+    - `[x]` Run all 85 scenarios and analyze results
+- `[x]` Verification
+    - `[x]` Target: Overall > 85%, Blind V3 > 80%
+    - `[x]` Confirm "Rule Engine v1" Freeze

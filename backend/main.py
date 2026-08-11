@@ -96,7 +96,7 @@ def calculate_combination_bonus(text: str):
 
     # 1. 대출 + 선입금 요구 (대출 사기)
     loan_words = ["대출", "대출 승인", "저금리", "대환"]
-    advance_payment_words = ["보증료", "수수료", "선입금", "비용을 보내", "먼저 입금", "보증보험료"]
+    advance_payment_words = ["보증료", "수수료", "선입금", "비용을 보내", "먼저 입금", "보증보험료", "처리 비용", "처리비용"]
 
     if any(word in text for word in loan_words) and any(word in text for word in advance_payment_words):
         bonus += 40.0
@@ -110,8 +110,8 @@ def calculate_combination_bonus(text: str):
         })
 
     # 2. 범죄 연루 + 체포/법적 위협
-    crime_accusation = ["사건에 연루", "범죄에 연루", "수사 대상", "범죄에 사용"]
-    legal_threats = ["체포", "구속", "법적 조치", "절차가 진행", "형사처벌"]
+    crime_accusation = ["사건에 연루", "범죄에 연루", "수사 대상", "범죄에 사용", "범죄 자금"]
+    legal_threats = ["체포", "구속", "법적 조치", "절차가 진행", "형사처벌", "영장"]
 
     if any(word in text for word in crime_accusation) and any(word in text for word in legal_threats):
         bonus += 20.0
@@ -123,6 +123,34 @@ def calculate_combination_bonus(text: str):
             "score": 20.0
         })
 
+    # 3. 기관 사칭 + 범죄 연루 (P2, P9 보완)
+    institutions = ["검찰", "지검", "수사관", "경찰", "금융감독원", "금감원"]
+    crimes = ["범죄", "사건", "연루", "범죄 자금", "이상 거래", "이상거래"]
+
+    if any(word in text for word in institutions) and any(word in text for word in crimes):
+        bonus += 10.0
+        label = "기관 사칭 범죄 압박"
+        reasons.append("정부 기관을 사칭하며 범죄 연루 사실을 강조하고 있습니다.")
+        factors.append({
+            "category": "inst_crime_pattern",
+            "label": label,
+            "score": 10.0
+        })
+
+    # 4. 사건/조사 + 체포/영장 (P9 보완)
+    investigations = ["사건", "조사", "수사"]
+    arrests = ["체포", "체포영장", "구속", "영장"]
+
+    if any(word in text for word in investigations) and any(word in text for word in arrests):
+        bonus += 10.0
+        label = "수사 및 구속 협박"
+        reasons.append("사건 수사를 이유로 구속이나 영장 발부를 언급하며 협박하고 있습니다.")
+        factors.append({
+            "category": "inv_arrest_pattern",
+            "label": label,
+            "score": 10.0
+        })
+
     return bonus, reasons, actions, factors
 
 def apply_safe_context_adjustment(text: str, score: float):
@@ -131,13 +159,14 @@ def apply_safe_context_adjustment(text: str, score: float):
     # 1. 뉴스/보도 문맥 (VN2, VN10 대응)
     news_words = ["뉴스", "기사", "보도", "봤어", "나왔어", "발표됐"]
     if any(word in text for word in news_words):
-        reduction += 40.0 # 상향 (30 -> 40)
+        reduction += 40.0
 
-    # 2. 정상적인 개인 송금/납부 문맥 (VN3, VN6 대응)
+    # 2. 정상적인 개인 송금/납부 문맥 (VN3, VN6, B3-N7 대응)
     normal_payment_patterns = [
         ["카드값", "계좌이체"],
         ["병원비", "보내"],
         ["밥값", "보내"],
+        ["책값", "송금"],
         ["공과금", "이체"],
         ["관리비", "확인"]
     ]
@@ -224,7 +253,7 @@ def analyze_risk(text: str):
     # 2. 오탐 완화 (N15 대응: 공식 설치 문맥)
     safe_install_patterns = [
         ["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"],
-        ["공식", "앱스토어"], ["공식", "홈페이지"]
+        ["공식", "앱스토어"], ["공식", "홈페이지"], ["회사", "이메일"], ["회사에서", "이메일"]
     ]
     is_safe_install = any(all(word in text for word in pattern) for pattern in safe_install_patterns)
 

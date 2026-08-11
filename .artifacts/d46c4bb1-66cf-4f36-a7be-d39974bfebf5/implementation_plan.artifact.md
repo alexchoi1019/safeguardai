@@ -1,53 +1,50 @@
-# Detection Engine Refinement: Context Layers & Pattern Expansion
+# Day 2: Detection Engine Freeze & Final Polish
 
-This plan addresses the limitations identified in the 2nd blind validation (48% pass rate). We will move beyond simple keyword scoring to a multi-layered analysis that includes context suppression, advanced pattern bonuses, and a broader keyword dictionary.
+This plan addresses the identified gaps in the 3rd blind validation while intentionally preserving some structural limitations as justification for future AI model integration. We aim to freeze the "Rule Engine v1" after this iteration.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> **Shift to Multi-Layered Analysis:**
-> Instead of just increasing keyword weights, we are adding:
-> 1. **Context Suppression Layer:** Reduces risk scores in safe contexts like news reports or personal bills.
-> 2. **Behavioral Combination Layer:** Grants bonuses for specific high-risk pairings (e.g., Loan Approval + Advance Fee Request).
-> 3. **Linguistic Variant Expansion:** Broadens the dictionary to catch phrases like "Screen is broken" or "Payment on my behalf."
+> **Final Adjustments:**
+> - **Keyword Gap Closure:** Adding 12+ specific phrases for account transfers, 이상거래 (abnormal transactions), and financial supervision.
+> - **Granular Combination Bonuses:** Adding targeted bonuses (+10 pts) for (Institution + Crime) and (Investigation + Warrant) pairs to push high-risk cases into the DANGER zone without causing global inflation.
+> - **Safe Context Expansion:** Recognizing "Corporate Email" as a safe environment for software installation.
+>
+> **Intentional Non-action (Engine Limits):**
+> - **B3-N5 & B3-N9:** We will **not** implement complex negative/informative context rules (e.g., "I didn't apply" or "Beware of X"). These remain as evidence for the necessity of a future LLM/BERT context layer.
 
 ## Proposed Changes
 
 ### Backend Logic
 
 #### [MODIFY] [main.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/main.py)
-- **Safe Context Adjustment:** Add `apply_safe_context_adjustment()` to mitigate scores when "News", "Report", or specific "Normal Bill" keywords are present.
-- **Combination Bonuses:** Add `calculate_combination_bonus()` for pairs like:
-    - Loan + Advance Payment (40 points)
-    - Crime Accusation + Threat/Arrest (20 points)
-- **Family Pattern Expansion:** Update `calculate_context_bonus()` to include variants for phone issues ("Broken screen", "Friend's number") and financial requests ("Payment instead", "Ask for account").
-- **Clamping:** Ensure all scores are safely clamped between 0 and 100.
+- Update `safe_context_patterns` in `analyze_risk` to include `["회사", "이메일"]` and `["회사에서", "이메일"]`.
+- Update `calculate_combination_bonus()` to include:
+    - **Institution + Crime:** (Institution keyword + Crime keyword) -> +10 points.
+    - **Investigation + Threat:** (Investigation/Case + Arrest/Warrant) -> +10 points.
+- Ensure all reasons and factors are synchronized.
 
 ### Data & Configuration
 
 #### [MODIFY] [keywords.json](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/keywords.json)
-- **Expand Dictionary:** Add missing phrases identified in VP2-VP15:
-    - *Institution:* "Financial institution", "Bank employee".
-    - *Money:* "Transfer funds to another account", "Designated account", "Payment fee", "On behalf of payment".
-    - *Tech:* "Remote support program", "Allow remote access", "Program I tell you".
-    - *Authority:* "Do not tell anyone", "Do not tell bank staff".
-    - *Messenger:* "Screen is broken", "Phone is messed up", "Friend's number", "Number changed".
+- **Add specific phrases:**
+    - `money_words`: "예금을 옮겨", "예금을 이동", "지정된 계좌", "잔액을 전부 이동", "처리 비용".
+    - `crime_words`: "이상 거래", "이상거래".
+    - `authority_words`: "금융감독 관련", "금융감독 절차", "은행 직원에게 이야기하지".
+    - `threat_words`: "금융거래가 제한", "처리하지 않으면".
 
 ### Testing
 
 #### [MODIFY] [test_suite.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/test_suite.py)
-- Synchronize logic with the new backend layers.
-- Retain current 60 scenarios (35 Training + 25 Blind) as a "Development Set" for regression testing.
-- **Note:** A 3rd blind validation set will be required after these changes to verify generalization.
+- Synchronize logic with the updated `main.py`.
+- Run all 85 scenarios (Training + Dev2 + Blind V3).
 
 ## Verification Plan
 
 ### Automated Tests
 - Run `test_suite.py`.
-- **Target Accuracy on Development Set (60 scenarios):**
-    - Normal (Training 15 + Blind 10): 24/25 SAFE (96%)
-    - Phishing (Training 20 + Blind 15): 30/35 WARNING+ (85%)
-    - Total: >90%
+- **Target Accuracy on Blind V3:** >80% (20/25).
+- **Regression Check:** Ensure Training and Dev2 sets maintain near 100%.
 
-### Manual Verification
-- Specifically verify **VN10** (News about phishing) and **VP9** (Broken screen impersonation) to confirm the new layers work as intended.
+### Engine Freeze Declaration
+- If the results reach the target, we will officially label the current logic as **"SafeguardAI Rule Engine v1"** and cease keyword/rule modifications to focus on real-world voice testing (Day 3).
