@@ -1,0 +1,7 @@
+- `[x]` Update `keywords.json` to cover all scenario keywords
+- `[x]` Update weights and thresholds in `main.py`
+- `[x]` Synchronize `test_suite.py` with `main.py` logic and weights
+- `[x]` Complete the 35 scenarios in `test_suite.py`
+- `[x]` Enhance `test_suite.py` output to generate the requested detailed table
+- `[x]` Run the test suite and verify results
+- `[x]` Create walkthrough with the final test report

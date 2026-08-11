@@ -5,19 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="871e2330-c3a3-47bd-a3f3-2e398775d23d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/checksums/checksums.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/checksums/md5-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/checksums/sha1-checksums.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/executionHistory/executionHistory.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/executionHistory/executionHistory.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/fileChanges/last-build.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/fileHashes/fileHashes.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/fileHashes/fileHashes.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/fileHashes/resourceHashesCache.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/9.0.0/gc.properties" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.artifacts/d46c4bb1-66cf-4f36-a7be-d39974bfebf5/implementation_plan.artifact.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.artifacts/d46c4bb1-66cf-4f36-a7be-d39974bfebf5/task.artifact.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.artifacts/d46c4bb1-66cf-4f36-a7be-d39974bfebf5/walkthrough.artifact.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/test_suite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/safeguardai/AnalyzeResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/safeguardai/AnalyzeResponse.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/safeguardai/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/safeguardai/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/keywords.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/keywords.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

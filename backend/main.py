@@ -39,16 +39,17 @@ if os.path.exists(KEYWORDS_PATH):
 def analyze_risk(text: str):
     score = 0.0
 
+    # 카테고리별 가중치 설정 (Day 13 최적화: 최종 튜닝)
     weights = {
-        "institution": 25.0,    # 기관 사칭
-        "crime_words": 30.0,    # 범죄 관련
-        "money_words": 35.0,    # 금전 요구
-        "technology_words": 30.0, # 원격제어/악성앱
+        "institution": 30.0,    # 기관 사칭
+        "crime_words": 35.0,    # 범죄 관련 (상향: P4 대응)
+        "money_words": 40.0,    # 금전 요구
+        "technology_words": 45.0, # 원격제어/악성앱
         "urgency_words": 15.0,   # 시급성 강조
-        "threat_words": 25.0,    # 협박/법적 책임
-        "authority_words": 20.0, # 권위 사칭/비밀유지
-        "loan_scam_words": 30.0, # 대출 사기
-        "messenger_words": 15.0  # 메신저 유도/지인 사칭
+        "threat_words": 30.0,    # 협박/법적 책임
+        "authority_words": 25.0, # 권위 사칭/비밀유지
+        "loan_scam_words": 35.0, # 대출 사기
+        "messenger_words": 25.0  # 메신저 유도/지인 사칭
     }
 
     category_labels = {
@@ -151,7 +152,7 @@ async def analyze_audio(file: UploadFile = File(...)):
         # 위험도 측정 및 근거 분석
         risk_result = analyze_risk(transcribed_text)
         risk_score = risk_result["risk_score"]
-        is_phishing = risk_score >= 80.0
+        is_phishing = risk_score >= 70.0 # 임계값 조정 (80 -> 70)
 
         total_duration = time.time() - start_time
         print(f"📊 분석 결과: 위험도 {risk_score}점 (총 소요 시간: {total_duration:.2f}초)")
