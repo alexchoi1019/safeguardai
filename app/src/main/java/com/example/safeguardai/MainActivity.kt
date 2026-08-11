@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity() {
         // 3단계 위험도별 화면 연출
         when (currentRiskLevel) {
             RiskLevel.DANGER -> {
-                // 80% 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
+                // 70점 이상: 위험 (빨간 배경 + 진동 + 경고 팝업)
                 rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
                 tvStatus.text = getString(R.string.status_phishing_heavy)
                 tvStatus.setTextColor(Color.RED)
@@ -293,14 +293,14 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             RiskLevel.WARNING -> {
-                // 40~79%: 주의 (주황 배경)
+                // 35~69점: 주의 (주황 배경)
                 rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
                 tvStatus.text = getString(R.string.status_suspicious_word)
                 tvStatus.setTextColor(Color.parseColor("#E65100"))
                 tvRiskScore.setTextColor(Color.parseColor("#E65100"))
             }
             RiskLevel.SAFE -> {
-                // 0~39%: 안전 (초록 배경)
+                // 0~34점: 안전 (초록 배경)
                 rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
                 tvStatus.text = getString(R.string.status_safe_normal)
                 tvStatus.setTextColor(Color.parseColor("#2E7D32"))
@@ -330,8 +330,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun getRiskLevel(score: Float): RiskLevel {
         return when {
-            score >= 80 -> RiskLevel.DANGER
-            score >= 40 -> RiskLevel.WARNING
+            score >= 70 -> RiskLevel.DANGER
+            score >= 35 -> RiskLevel.WARNING
             else -> RiskLevel.SAFE
         }
     }

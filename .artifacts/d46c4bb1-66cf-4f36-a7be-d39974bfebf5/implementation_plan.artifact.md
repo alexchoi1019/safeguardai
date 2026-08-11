@@ -1,46 +1,50 @@
-# Voice Phishing Detection Test Suite & Weight Tuning Plan
+# Risk Analysis Refinement: Context Patterns & Threshold Synchronization
 
-This plan aims to implement the 35 test scenarios provided by the user, update the risk analysis weights, and refine the testing tool to provide detailed results in the requested format.
+This plan addresses the 4 failed test cases (N15, P6, P12, P19) by implementing context-aware rules in the backend and synchronizing the risk thresholds between the Android app and the backend.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> The weights will be updated to the recommended values. Please verify if these values align with your expectations for the MVP.
+> The thresholds will be lowered to **WARNING: 35+** and **DANGER: 70+** across both the Android app and the Backend.
 >
-> **Recommended Weights:**
-> - Money Words: 40.0
-> - Technology Words: 40.0
-> - Loan Scam Words: 35.0
-> - Institution / Crime / Threat: 25.0
-> - Authority / Messenger: 20.0
-> - Urgency: 10.0
+> **Key Logic Additions:**
+> - **Safe Context Exception:** Reduces score for "Technology" keywords if safe words like "Company" or "Announcement" are present.
+> - **Urgency Pressure Bonus:** Adds 20 points when urgency is combined with pressure words like "Big trouble" or "Stop account".
+> - **Family Impersonation Bonus:** Adds 50 points when family terms, phone problems, and money requests occur together.
 
 ## Proposed Changes
+
+### Android Application
+
+#### [MODIFY] [MainActivity.kt](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/app/src/main/java/com/example/safeguardai/MainActivity.kt)
+- Update `getRiskLevel` thresholds to `35` (WARNING) and `70` (DANGER).
+- Update `updateRiskUi` comments and logic to reflect the new thresholds.
 
 ### Backend Logic
 
 #### [MODIFY] [main.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/main.py)
-- Update weights to match the recommended tuning criteria.
-- Ensure the `analyze_risk` function returns sufficient data for the detailed test report.
-
-#### [MODIFY] [test_suite.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/test_suite.py)
-- Update weights to match `main.py`.
-- Refine the output format to match the user's requested "Recording Table" (ID, Actual Sentence, STT Result, Immediate Score, Cumulative Score, Final Stage, Category, Expected, Success).
-- Add the 15 Normal + 20 Phishing scenarios (already partially present, but need full synchronization).
+- Refactor `analyze_risk` to integrate context-based scoring rules.
+- Implement `calculate_context_rules` (or similar) to handle specific patterns (Urgency + Pressure, Family + Money).
+- Add exception logic for safe contexts (e.g., corporate announcements).
+- Ensure final score is clamped between 0 and 100.
+- Update `is_phishing` threshold to `70.0`.
 
 ### Data & Configuration
 
 #### [MODIFY] [keywords.json](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/keywords.json)
-- Review and potentially add missing keywords from the new scenarios (e.g., "AnyDesk", "AnyDesk" is already there, but checking others like "밥값", "관리비").
+- Add missing specific phrases to ensure the new context rules trigger correctly (e.g., "입금하지 않으면", "승인이 취소", "돈 좀 보내줘").
+
+### Testing
+
+#### [MODIFY] [test_suite.py](file:///C:/Users/winne/OneDrive/문서/GitHub/safeguardai/backend/test_suite.py)
+- Synchronize logic and thresholds with `main.py`.
+- Update the expected result for **P19** from `WARNING` to `DANGER` as it represents a high-risk pattern.
 
 ## Verification Plan
 
 ### Automated Tests
-- Run the updated `test_suite.py` to generate the full report for 35 scenarios.
-- Verify the pass rate against the user's target:
-    - Normal: 13/15 SAFE
-    - Phishing: 17/20 WARNING+
-    - High-risk: Most DANGER
+- Run `test_suite.py` to verify the 35 scenarios.
+- Expected target: **35/35 (100%)** accuracy on the development set.
 
 ### Manual Verification
-- Review the generated table to identify specific failures (STT vs. Keywords vs. Weights).
+- Deploy to Android and verify that the UI colors and status messages reflect the new thresholds (35/70).

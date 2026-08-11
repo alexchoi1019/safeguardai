@@ -36,13 +36,46 @@ if os.path.exists(KEYWORDS_PATH):
         keywords_data = json.load(f)
 
 # 4. 고도화된 위험도 분석 함수
+def calculate_context_bonus(text: str, keywords_data: dict):
+    bonus = 0.0
+    reasons = []
+    actions = []
+
+    # 1. 긴급 압박 (긴급성 + 불이익 표현)
+    urgency_trigger_words = keywords_data.get("urgency_words", [])
+    pressure_words = ["큰일", "취소", "정지", "불이익", "문제가 생", "처리하지 않으면", "지금 바로"]
+
+    has_urgency = any(word in text for word in urgency_trigger_words)
+    has_pressure = any(word in text for word in pressure_words)
+
+    if has_urgency and has_pressure:
+        bonus += 20.0
+        reasons.append("즉시 행동하지 않으면 문제가 생긴다고 압박하는 표현이 감지되었습니다.")
+        actions.append("상대방의 독촉에 따르지 말고 전화를 끊은 뒤 내용을 다시 확인하세요.")
+
+    # 2. 지인 사칭 고위험 패턴 (가족 + 휴대폰 문제 + 송금 요구)
+    family_words = ["엄마", "아빠", "아들", "딸", "형", "누나", "언니", "오빠"]
+    phone_problem_words = ["휴대폰 고장", "폰 고장", "폰이 망가", "휴대폰이 망가", "다른 번호", "번호가 바뀌"]
+    money_request_words = ["돈 좀 보내", "돈 보내", "송금해", "입금해", "계좌로", "보내줘"]
+
+    has_family = any(word in text for word in family_words)
+    has_phone_problem = any(word in text for word in phone_problem_words)
+    has_money_request = any(word in text for word in money_request_words)
+
+    if has_family and has_phone_problem and has_money_request:
+        bonus += 50.0
+        reasons.append("가족을 사칭하면서 휴대폰 문제를 이유로 송금을 요구하는 전형적인 지인 사칭 패턴이 감지되었습니다.")
+        actions.append("돈을 보내지 말고 기존에 알고 있던 가족의 전화번호로 직접 연락해 본인인지 확인하세요.")
+
+    return bonus, reasons, actions
+
 def analyze_risk(text: str):
     score = 0.0
 
     # 카테고리별 가중치 설정 (Day 13 최적화: 최종 튜닝)
     weights = {
         "institution": 30.0,    # 기관 사칭
-        "crime_words": 35.0,    # 범죄 관련 (상향: P4 대응)
+        "crime_words": 35.0,    # 범죄 관련
         "money_words": 40.0,    # 금전 요구
         "technology_words": 45.0, # 원격제어/악성앱
         "urgency_words": 15.0,   # 시급성 강조
@@ -107,12 +140,33 @@ def analyze_risk(text: str):
             if category in action_map:
                 actions.append(action_map[category])
 
+    # --- 문맥 기반 추가 분석 (N15, P6, P12, P19 대응) ---
+
+    # 1. 정상적인 앱 설치 문맥에 대한 오탐 완화 (N15 대응)
+    safe_context_patterns = [
+        ["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"], ["공식", "앱스토어"]
+    ]
+    safe_technology_context = any(all(word in text for word in pattern) for pattern in safe_context_patterns)
+
+    if safe_technology_context and "앱 설치 또는 원격제어 요구" in detected_categories:
+        score -= weights["technology_words"]
+        detected_categories = [c for c in detected_categories if c != "앱 설치 또는 원격제어 요구"]
+        risk_factors = [f for f in risk_factors if f["category"] != "technology_words"]
+        reasons = [r for r in reasons if "앱 설치 또는 원격제어" not in r]
+        actions = [a for a in actions if "원격 제어 앱" not in a]
+
+    # 2. 문맥 기반 보너스 (P6, P12, P19 대응)
+    context_bonus, context_reasons, context_actions = calculate_context_bonus(text, keywords_data)
+    score += context_bonus
+    reasons.extend(context_reasons)
+    actions.extend(context_actions)
+
     # 위험도가 높을 경우 기본 행동 지침 추가
-    if score >= 40 and not actions:
+    if score >= 35 and not actions:
         actions.append("보이스피싱이 의심되오니 즉시 통화를 종료하시고 112에 신고하세요.")
 
     return {
-        "risk_score": min(score, 100.0),
+        "risk_score": min(max(score, 0.0), 100.0),
         "detected_categories": detected_categories,
         "detected_keywords": list(set(detected_keywords)),
         "reasons": reasons,

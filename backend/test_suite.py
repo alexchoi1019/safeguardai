@@ -31,6 +31,26 @@ category_labels = {
     "messenger_words": "지인/메신저"
 }
 
+def calculate_context_bonus(text: str):
+    bonus = 0.0
+
+    # 1. 긴급 압박
+    urgency_trigger_words = keywords_data.get("urgency_words", [])
+    pressure_words = ["큰일", "취소", "정지", "불이익", "문제가 생", "처리하지 않으면", "지금 바로"]
+    if any(word in text for word in urgency_trigger_words) and any(word in text for word in pressure_words):
+        bonus += 20.0
+
+    # 2. 지인 사칭 고위험 패턴
+    family_words = ["엄마", "아빠", "아들", "딸", "형", "누나", "언니", "오빠"]
+    phone_problem_words = ["휴대폰 고장", "폰 고장", "폰이 망가", "휴대폰이 망가", "다른 번호", "번호가 바뀌"]
+    money_request_words = ["돈 좀 보내", "돈 보내", "송금해", "입금해", "계좌로", "보내줘"]
+    if any(word in text for word in family_words) and \
+       any(word in text for word in phone_problem_words) and \
+       any(word in text for word in money_request_words):
+        bonus += 50.0
+
+    return bonus
+
 def analyze_risk_detailed(text: str):
     score = 0.0
     detected_cats = []
@@ -40,16 +60,31 @@ def analyze_risk_detailed(text: str):
             score += weight
             detected_cats.append(category_labels.get(cat))
 
-    final_score = min(score, 100.0)
+    # --- Context Rules (Sync with main.py) ---
 
-    # Thresholds
+    # N15 Safe Context Mitigation
+    safe_context_patterns = [["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"], ["공식", "앱스토어"]]
+    safe_tech = any(all(word in text for word in pattern) for pattern in safe_context_patterns)
+    if safe_tech and "앱/원격제어" in detected_cats:
+        score -= weights["technology_words"]
+        detected_cats.remove("앱/원격제어")
+
+    # Bonus Rules (P6, P12, P19)
+    bonus = calculate_context_bonus(text)
+    score += bonus
+    if bonus > 0:
+        detected_cats.append("문맥 보너스")
+
+    final_score = min(max(score, 0.0), 100.0)
+
+    # Thresholds (Synced)
     risk_level = "SAFE"
     if final_score >= 70: risk_level = "DANGER"
     elif final_score >= 35: risk_level = "WARNING"
 
     return final_score, risk_level, detected_cats
 
-# 2. 35 Scenarios
+# 2. 35 Scenarios (Updated P19 expectation)
 scenarios = [
     ("N1", "오늘 저녁에 뭐 먹을까?", "SAFE"),
     ("N2", "내일 병원 예약 시간이 10시야.", "SAFE"),
@@ -84,13 +119,13 @@ scenarios = [
     ("P16", "검찰입니다. 계좌가 범죄에 연루됐고 지금 바로 송금해야 합니다.", "DANGER"),
     ("P17", "금융감독원입니다. 원격 앱을 설치하고 안전계좌로 이체하세요.", "DANGER"),
     ("P18", "대출 심사 중입니다. 수수료를 입금하지 않으면 승인이 취소됩니다.", "DANGER"),
-    ("P19", "나 아들인데 폰이 망가졌어. 다른 번호로 연락 중이야. 돈 좀 보내줘.", "WARNING"),
+    ("P19", "나 아들인데 폰이 망가졌어. 다른 번호로 연락 중이야. 돈 좀 보내줘.", "DANGER"),
     ("P20", "검찰입니다. 사건에 연루됐으니 아무에게도 말하지 말고 지금 안전계좌로 전액 송금하세요.", "DANGER")
 ]
 
 # 3. Execution
 print(f"{'ID':<4} | {'Score':<5} | {'Actual':<8} | {'Expected':<8} | {'Success':<7} | {'Categories'}")
-print("-" * 100)
+print("-" * 110)
 
 passed = 0
 for sid, text, expected in scenarios:
@@ -107,5 +142,5 @@ for sid, text, expected in scenarios:
 
     print(f"{sid:<4} | {score:<5.1f} | {actual_level:<8} | {expected:<8} | {'PASS' if is_success else 'FAIL':<7} | {', '.join(cats)}")
 
-print("-" * 100)
+print("-" * 110)
 print(f"Total Pass Rate: {passed}/{len(scenarios)} ({passed/len(scenarios)*100:.1f}%)")

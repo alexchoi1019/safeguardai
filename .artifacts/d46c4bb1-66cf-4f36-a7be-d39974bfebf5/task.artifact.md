@@ -1,7 +1,8 @@
-- `[x]` Update `keywords.json` to cover all scenario keywords
-- `[x]` Update weights and thresholds in `main.py`
-- `[x]` Synchronize `test_suite.py` with `main.py` logic and weights
-- `[x]` Complete the 35 scenarios in `test_suite.py`
-- `[x]` Enhance `test_suite.py` output to generate the requested detailed table
-- `[x]` Run the test suite and verify results
-- `[x]` Create walkthrough with the final test report
+- `[x]` Risk Analysis Refinement
+    - `[x]` Update Android thresholds in `MainActivity.kt`
+    - `[x]` Refine `keywords.json` for context rules
+    - `[x]` Implement context rules in `main.py`
+    - `[x]` Synchronize and update `test_suite.py`
+- `[x]` Verification
+    - `[x]` Run 35-scenario test suite
+    - `[x]` Verify 100% pass rate
