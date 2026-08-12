@@ -294,20 +294,30 @@ def analyze_risk(text: str):
 @app.post("/analyze-audio")
 async def analyze_audio(file: UploadFile = File(...)):
     start_time = time.time()
-    print(f"\n[Request] 음성 분석 요청 수수료: {file.filename}")
+    print(f"\n[Request] 음성 분석 요청 수신: {file.filename}")
 
     # 수신받은 임시 음성 파일 저장
     temp_file_path = f"temp_{file.filename}"
     with open(temp_file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    file_size = os.path.getsize(temp_file_path)
+    print(f"📁 파일 크기: {file_size / 1024:.1f} KB")
+
     try:
         # STT 실행
         print("🎙️ Faster-Whisper 분석 시작...")
         stt_start_time = time.time()
 
-        # beam_size=5는 정확도와 속도의 균형을 맞춘 설정입니다.
-        segments, info = stt_model.transcribe(temp_file_path, beam_size=5, language="ko")
+        # 실시간 5초 분석이므로 beam_size=1 및 VAD 필터 적용
+        segments, info = stt_model.transcribe(
+            temp_file_path,
+            language="ko",
+            beam_size=1,
+            vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 300},
+            condition_on_previous_text=False
+        )
 
         transcribed_text = ""
         for segment in segments:
