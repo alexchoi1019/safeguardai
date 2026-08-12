@@ -35,6 +35,10 @@ if os.path.exists(KEYWORDS_PATH):
     with open(KEYWORDS_PATH, "r", encoding="utf-8") as f:
         keywords_data = json.load(f)
 
+# 텍스트 정규화 함수 (공백 제거 및 소문자화)
+def normalize_text(text: str) -> str:
+    return text.replace(" ", "").lower()
+
 # 4. 고도화된 위험도 분석 함수
 def calculate_context_bonus(text: str, keywords_data: dict):
     bonus = 0.0
@@ -42,12 +46,14 @@ def calculate_context_bonus(text: str, keywords_data: dict):
     actions = []
     context_factors = []
 
+    normalized_text = normalize_text(text)
+
     # 1. 긴급 압박 (긴급성 + 불이익 표현)
     urgency_trigger_words = keywords_data.get("urgency_words", [])
-    pressure_words = ["큰일", "취소", "정지", "불이익", "문제가 생", "처리하지 않으면", "지금 바로"]
+    pressure_words = ["큰일", "취소", "정지", "불이익", "문제가생", "처리하지않으면", "지금바로"]
 
-    has_urgency = any(word in text for word in urgency_trigger_words)
-    has_pressure = any(word in text for word in pressure_words)
+    has_urgency = any(normalize_text(word) in normalized_text for word in urgency_trigger_words)
+    has_pressure = any(word in normalized_text for word in pressure_words)
 
     if has_urgency and has_pressure:
         bonus += 20.0
@@ -61,21 +67,18 @@ def calculate_context_bonus(text: str, keywords_data: dict):
         })
 
     # 2. 지인 사칭 고위험 패턴 (가족 + 휴대폰 문제 + 송금 요구)
+    # 단순 문구가 아니라 키워드 조합으로 판단하여 STT 변형에 대응
     family_words = ["엄마", "아빠", "아들", "딸", "형", "누나", "언니", "오빠"]
-    phone_problem_words = [
-        "휴대폰 고장", "폰 고장", "폰이 망가", "휴대폰이 망가",
-        "액정이 깨져", "액정 깨져", "다른 번호", "친구 번호", "번호 바뀌"
-    ]
-    money_request_words = [
-        "돈 좀 보내", "돈 보내", "송금해", "입금해", "계좌로", "보내줘",
-        "결제", "대신 보내", "계좌로 부탁"
-    ]
+    phone_words = ["휴대폰", "핸드폰", "폰", "액정"]
+    problem_words = ["고장", "망가", "깨져", "문제", "안돼", "안돼요"]
+    money_request_words = ["돈", "송금", "입금", "계좌", "보내", "부탁", "결제"]
 
-    has_family = any(word in text for word in family_words)
-    has_phone_problem = any(word in text for word in phone_problem_words)
-    has_money_request = any(word in text for word in money_request_words)
+    has_family = any(word in normalized_text for word in family_words)
+    has_phone = any(word in normalized_text for word in phone_words)
+    has_problem = any(word in normalized_text for word in problem_words)
+    has_money = any(word in normalized_text for word in money_request_words)
 
-    if has_family and has_phone_problem and has_money_request:
+    if has_family and has_phone and has_problem and has_money:
         bonus += 50.0
         label = "가족 사칭 송금 요구 패턴"
         reasons.append("가족을 사칭하면서 휴대폰 문제를 이유로 송금을 요구하는 전형적인 지인 사칭 패턴이 감지되었습니다.")
@@ -94,11 +97,13 @@ def calculate_combination_bonus(text: str):
     actions = []
     factors = []
 
-    # 1. 대출 + 선입금 요구 (대출 사기)
-    loan_words = ["대출", "대출 승인", "저금리", "대환"]
-    advance_payment_words = ["보증료", "수수료", "선입금", "비용을 보내", "먼저 입금", "보증보험료", "처리 비용", "처리비용"]
+    normalized_text = normalize_text(text)
 
-    if any(word in text for word in loan_words) and any(word in text for word in advance_payment_words):
+    # 1. 대출 + 선입금 요구 (대출 사기)
+    loan_words = ["대출", "대출승인", "저금리", "대환"]
+    advance_payment_words = ["보증료", "수수료", "선입금", "비용을보내", "먼저입금", "보증보험료", "처리비용"]
+
+    if any(normalize_text(word) in normalized_text for word in loan_words) and any(normalize_text(word) in normalized_text for word in advance_payment_words):
         bonus += 40.0
         label = "대출 선입금 요구 패턴"
         reasons.append("대출을 조건으로 먼저 돈(수수료, 보증료 등)을 요구하는 전형적인 대출 사기 패턴이 감지되었습니다.")
@@ -110,10 +115,10 @@ def calculate_combination_bonus(text: str):
         })
 
     # 2. 범죄 연루 + 체포/법적 위협
-    crime_accusation = ["사건에 연루", "범죄에 연루", "수사 대상", "범죄에 사용", "범죄 자금"]
-    legal_threats = ["체포", "구속", "법적 조치", "절차가 진행", "형사처벌", "영장"]
+    crime_accusation = ["사건에연루", "범죄에연루", "수사대상", "범죄에사용", "범죄자금"]
+    legal_threats = ["체포", "구속", "법적조치", "절차가진행", "형사처벌", "영장"]
 
-    if any(word in text for word in crime_accusation) and any(word in text for word in legal_threats):
+    if any(normalize_text(word) in normalized_text for word in crime_accusation) and any(normalize_text(word) in normalized_text for word in legal_threats):
         bonus += 20.0
         label = "범죄 연루 협박 패턴"
         reasons.append("범죄 연루를 주장하면서 체포나 법적 조치를 언급하며 심리적으로 압박하는 패턴이 감지되었습니다.")
@@ -123,32 +128,21 @@ def calculate_combination_bonus(text: str):
             "score": 20.0
         })
 
-    # 3. 기관 사칭 + 범죄 연루 (P2, P9 보완)
-    institutions = ["검찰", "지검", "수사관", "경찰", "금융감독원", "금감원"]
-    crimes = ["범죄", "사건", "연루", "범죄 자금", "이상 거래", "이상거래"]
+    # 3. 기관 사칭 + 계좌 + 범죄 연루 (보완)
+    institutions = ["검찰", "지검", "수사관", "경찰", "금융감독원", "금감원", "수사기관"]
+    accounts = ["계좌", "통장", "카드"]
+    crimes = ["범죄", "사건", "연루", "범죄자금", "이상거래", "명의도용"]
 
-    if any(word in text for word in institutions) and any(word in text for word in crimes):
-        bonus += 10.0
-        label = "기관 사칭 범죄 압박"
-        reasons.append("정부 기관을 사칭하며 범죄 연루 사실을 강조하고 있습니다.")
+    if any(word in normalized_text for word in institutions) and \
+       any(word in normalized_text for word in accounts) and \
+       any(word in normalized_text for word in crimes):
+        bonus += 30.0
+        label = "기관 사칭 계좌 조사 패턴"
+        reasons.append("정부 기관을 사칭하며 본인의 계좌가 범죄에 연루되었다고 주장하는 패턴이 감지되었습니다.")
         factors.append({
-            "category": "inst_crime_pattern",
+            "category": "inst_account_crime_pattern",
             "label": label,
-            "score": 10.0
-        })
-
-    # 4. 사건/조사 + 체포/영장 (P9 보완)
-    investigations = ["사건", "조사", "수사"]
-    arrests = ["체포", "체포영장", "구속", "영장"]
-
-    if any(word in text for word in investigations) and any(word in text for word in arrests):
-        bonus += 10.0
-        label = "수사 및 구속 협박"
-        reasons.append("사건 수사를 이유로 구속이나 영장 발부를 언급하며 협박하고 있습니다.")
-        factors.append({
-            "category": "inv_arrest_pattern",
-            "label": label,
-            "score": 10.0
+            "score": 30.0
         })
 
     return bonus, reasons, actions, factors
@@ -180,6 +174,7 @@ def apply_safe_context_adjustment(text: str, score: float):
 
 def analyze_risk(text: str):
     score = 0.0
+    normalized_text = normalize_text(text)
 
     # 카테고리별 가중치 설정 (Day 13 최적화: 최종 튜닝)
     weights = {
@@ -229,7 +224,8 @@ def analyze_risk(text: str):
     for category, weight in weights.items():
         matched_words = []
         for word in keywords_data.get(category, []):
-            if word in text:
+            normalized_word = normalize_text(word)
+            if normalized_word in normalized_text:
                 matched_words.append(word)
 
         if matched_words:
@@ -255,7 +251,7 @@ def analyze_risk(text: str):
         ["회사", "공지"], ["회사에서", "공지"], ["업데이트", "공식"],
         ["공식", "앱스토어"], ["공식", "홈페이지"], ["회사", "이메일"], ["회사에서", "이메일"]
     ]
-    is_safe_install = any(all(word in text for word in pattern) for pattern in safe_install_patterns)
+    is_safe_install = any(all(normalize_text(word) in normalized_text for word in pattern) for pattern in safe_install_patterns)
 
     if is_safe_install and "앱 설치 또는 원격제어 요구" in detected_categories:
         score -= weights["technology_words"]
