@@ -34,7 +34,7 @@
     <string name="notification_title">SafeguardAI 보호 중</string>
     <string name="notification_content">보이스피싱을 감시하고 있습니다.</string>
 
-    <string name="header_title">보이스 피싱 실시간 탐지 서비스</string>
+    <string name="header_title">Anti-Phish Spring</string>
     <string name="risk_label">현재 위험도</string>
     <string name="report_112">보이스 피싱 의심 신고하기 (112)</string>
 </resources>
