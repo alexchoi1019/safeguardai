@@ -7,12 +7,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -39,8 +41,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var scrollView: ScrollView
     private lateinit var tvStatus: TextView
     private lateinit var tvRiskScore: TextView
+    private lateinit var tvRiskLevelBadge: TextView
+    private lateinit var pbRisk: ProgressBar
     private lateinit var tvReasons: TextView
     private lateinit var tvActions: TextView
+    private lateinit var btnReport: Button
     private lateinit var btnStart: Button
 
     private var isDetecting = false
@@ -63,7 +68,7 @@ class MainActivity : AppCompatActivity() {
                 val error = intent.getStringExtra(DetectionService.EXTRA_ERROR)
 
                 if (result != null) {
-                    tvStatus.text = "음성 분석 중..."
+                    tvStatus.text = getString(R.string.status_analyzing)
                     updateRiskUi(result)
                 } else if (error != null) {
                     tvStatus.text = error
@@ -80,8 +85,11 @@ class MainActivity : AppCompatActivity() {
         scrollView = findViewById(R.id.scrollView)
         tvStatus = findViewById(R.id.tvStatus)
         tvRiskScore = findViewById(R.id.tvRiskScore)
+        tvRiskLevelBadge = findViewById(R.id.tvRiskLevelBadge)
+        pbRisk = findViewById(R.id.pbRisk)
         tvReasons = findViewById(R.id.tvReasons)
         tvActions = findViewById(R.id.tvActions)
+        btnReport = findViewById(R.id.btnReport)
         btnStart = findViewById(R.id.btnStart)
 
         btnStart.setOnClickListener {
@@ -90,6 +98,11 @@ class MainActivity : AppCompatActivity() {
             } else {
                 checkPermissions()
             }
+        }
+
+        btnReport.setOnClickListener {
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:112"))
+            startActivity(intent)
         }
     }
 
@@ -139,9 +152,10 @@ class MainActivity : AppCompatActivity() {
         previousRiskLevel = RiskLevel.SAFE
 
         isDetecting = true
-        btnStart.text = "탐지 중지"
-        tvStatus.text = "실시간 탐지를 시작합니다."
-        rootLayout.setBackgroundColor(Color.parseColor("#F5F5F5"))
+        btnStart.text = getString(R.string.btn_stop_test)
+        btnStart.setBackgroundColor(Color.parseColor("#888888"))
+        tvStatus.text = getString(R.string.status_safe_normal)
+        rootLayout.setBackgroundColor(Color.parseColor("#FFF8F9"))
 
         val serviceIntent = Intent(this, DetectionService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -153,13 +167,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopDetection() {
         isDetecting = false
-        btnStart.text = "탐지 시작"
-        tvStatus.text = "탐지가 중지되었습니다."
+        btnStart.text = getString(R.string.btn_start_test)
+        btnStart.setBackgroundColor(Color.parseColor("#FF4081"))
+        tvStatus.text = getString(R.string.status_waiting)
 
         val serviceIntent = Intent(this, DetectionService::class.java)
         stopService(serviceIntent)
 
-        Toast.makeText(this, "실시간 탐지를 중지했습니다.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "탐지를 중지했습니다.", Toast.LENGTH_SHORT).show()
     }
 
     private fun updateRiskUi(result: AnalyzeResponse) {
@@ -169,6 +184,7 @@ class MainActivity : AppCompatActivity() {
         val currentRiskLevel = getRiskLevel(score)
 
         tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
+        pbRisk.progress = score.toInt()
 
         for (reason in result.reasons) {
             if (reason !in accumulatedReasons) {
@@ -206,10 +222,12 @@ class MainActivity : AppCompatActivity() {
 
         when (currentRiskLevel) {
             RiskLevel.DANGER -> {
-                rootLayout.setBackgroundColor(Color.parseColor("#FFEBEE"))
+                rootLayout.setBackgroundColor(Color.parseColor("#FFF0F3"))
+                tvRiskLevelBadge.text = getString(R.string.level_danger)
+                tvRiskLevelBadge.setBackgroundResource(R.drawable.bg_badge_danger)
                 tvStatus.text = getString(R.string.status_phishing_heavy)
-                tvStatus.setTextColor(Color.RED)
-                tvRiskScore.setTextColor(Color.RED)
+                tvStatus.setTextColor(Color.parseColor("#D81B60"))
+                tvRiskScore.setTextColor(Color.parseColor("#D81B60"))
 
                 if (previousRiskLevel != RiskLevel.DANGER) {
                     triggerVibration()
@@ -217,13 +235,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             RiskLevel.WARNING -> {
-                rootLayout.setBackgroundColor(Color.parseColor("#FFF3E0"))
+                rootLayout.setBackgroundColor(Color.parseColor("#FFF9F0"))
+                tvRiskLevelBadge.text = getString(R.string.level_warning)
+                tvRiskLevelBadge.setBackgroundResource(R.drawable.bg_badge_warning)
                 tvStatus.text = getString(R.string.status_suspicious_word)
                 tvStatus.setTextColor(Color.parseColor("#E65100"))
                 tvRiskScore.setTextColor(Color.parseColor("#E65100"))
             }
             RiskLevel.SAFE -> {
-                rootLayout.setBackgroundColor(Color.parseColor("#E8F5E9"))
+                rootLayout.setBackgroundColor(Color.parseColor("#F1F8F1"))
+                tvRiskLevelBadge.text = getString(R.string.level_safe)
+                tvRiskLevelBadge.setBackgroundResource(R.drawable.bg_badge_safe)
                 tvStatus.text = getString(R.string.status_safe_normal)
                 tvStatus.setTextColor(Color.parseColor("#2E7D32"))
                 tvRiskScore.setTextColor(Color.parseColor("#2E7D32"))

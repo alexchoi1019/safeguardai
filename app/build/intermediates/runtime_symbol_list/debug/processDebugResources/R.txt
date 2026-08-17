@@ -3961,6 +3961,9 @@ int string mtrl_switch_track_decoration_path 0x7f0f009b
 int string mtrl_switch_track_path 0x7f0f009c
 int string mtrl_timepicker_cancel 0x7f0f009d
 int string mtrl_timepicker_confirm 0x7f0f009e
+int string notification_channel_name 0x7f0f00bd
+int string notification_content 0x7f0f00be
+int string notification_title 0x7f0f00bf
 int string password_toggle_content_description 0x7f0f009f
 int string path_password_eye 0x7f0f00a0
 int string path_password_eye_mask_strike_through 0x7f0f00a1

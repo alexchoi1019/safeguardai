@@ -3962,6 +3962,9 @@ string mtrl_switch_track_decoration_path
 string mtrl_switch_track_path
 string mtrl_timepicker_cancel
 string mtrl_timepicker_confirm
+string notification_channel_name
+string notification_content
+string notification_title
 string password_toggle_content_description
 string path_password_eye
 string path_password_eye_mask_strike_through

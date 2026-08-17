@@ -6,6 +6,7 @@ drawable ic_launcher_background
 drawable ic_launcher_foreground
 id btnStart
 id rootLayout
+id scrollView
 id tvActionTitle
 id tvActions
 id tvReasonTitle
@@ -22,6 +23,9 @@ string btn_start_test
 string dialog_ok
 string dialog_warning_message
 string dialog_warning_title
+string notification_channel_name
+string notification_content
+string notification_title
 string reason_empty
 string reason_title
 string risk_score_format
