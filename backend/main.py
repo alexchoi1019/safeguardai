@@ -305,13 +305,17 @@ async def analyze_audio(file: UploadFile = File(...)):
         print("🎙️ Faster-Whisper 분석 시작...")
         stt_start_time = time.time()
 
-        # 실시간 5초 분석이므로 beam_size=1 및 VAD 필터 적용
+        # VAD 강화를 통해 무음/잡음 필터링 효율 높임 (지연 시간 단축)
         segments, info = stt_model.transcribe(
             temp_file_path,
             language="ko",
             beam_size=1,
             vad_filter=True,
-            vad_parameters={"min_silence_duration_ms": 300},
+            vad_parameters={
+                "min_silence_duration_ms": 500,
+                "threshold": 0.6,
+                "min_speech_duration_ms": 300
+            },
             condition_on_previous_text=False
         )
 

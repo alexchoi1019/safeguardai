@@ -12,7 +12,8 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.widget.Button
-import android.widget.LinearLayout
+import android.widget.ScrollView
+import androidx.constraintlayout.widget.ConstraintLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -41,7 +42,8 @@ class MainActivity : AppCompatActivity() {
         private const val MAX_RISK_HISTORY = 3
     }
 
-    private lateinit var rootLayout: LinearLayout
+    private lateinit var rootLayout: ConstraintLayout
+    private lateinit var scrollView: ScrollView
     private lateinit var tvStatus: TextView
     private lateinit var tvRiskScore: TextView
     private lateinit var tvReasons: TextView
@@ -68,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         rootLayout = findViewById(R.id.rootLayout)
+        scrollView = findViewById(R.id.scrollView)
         tvStatus = findViewById(R.id.tvStatus)
         tvRiskScore = findViewById(R.id.tvRiskScore)
         tvReasons = findViewById(R.id.tvReasons)
@@ -259,8 +262,17 @@ class MainActivity : AppCompatActivity() {
 
         tvRiskScore.text = getString(R.string.risk_score_format, score.toInt())
 
-        // 탐지 근거 누적 및 표시
-        accumulatedReasons.addAll(result.reasons)
+        // 탐지 근거 누적 및 표시 (최근 5개 유지)
+        for (reason in result.reasons) {
+            if (reason !in accumulatedReasons) {
+                if (accumulatedReasons.size >= 5) {
+                    val first = accumulatedReasons.first()
+                    accumulatedReasons.remove(first)
+                }
+                accumulatedReasons.add(reason)
+            }
+        }
+        
         if (accumulatedReasons.isNotEmpty()) {
             val reasonText = accumulatedReasons.joinToString(separator = "\n") { "• $it" }
             tvReasons.text = reasonText
@@ -268,13 +280,27 @@ class MainActivity : AppCompatActivity() {
             tvReasons.text = getString(R.string.reason_empty)
         }
 
-        // 행동 지침 누적 및 표시
-        accumulatedActions.addAll(result.actions)
+        // 행동 지침 누적 및 표시 (최근 5개 유지)
+        for (action in result.actions) {
+            if (action !in accumulatedActions) {
+                if (accumulatedActions.size >= 5) {
+                    val first = accumulatedActions.first()
+                    accumulatedActions.remove(first)
+                }
+                accumulatedActions.add(action)
+            }
+        }
+        
         if (accumulatedActions.isNotEmpty()) {
             val actionText = accumulatedActions.joinToString(separator = "\n") { "• $it" }
             tvActions.text = actionText
         } else {
             tvActions.text = getString(R.string.action_empty)
+        }
+        
+        // 데이터 업데이트 후 하단으로 스크롤
+        scrollView.post {
+            scrollView.fullScroll(ScrollView.FOCUS_DOWN)
         }
 
         // 3단계 위험도별 화면 연출
