@@ -1,6 +1,7 @@
 package com.example.safeguardai
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class RiskFactor(
     @SerializedName("category")
@@ -11,7 +12,7 @@ data class RiskFactor(
 
     @SerializedName("score")
     val score: Float
-)
+) : Serializable
 
 data class AnalyzeResponse(
     @SerializedName("status") val status: String,
@@ -36,4 +37,4 @@ data class AnalyzeResponse(
     
     @SerializedName("processing_time")
     val processingTime: Float? = null
-)
+) : Serializable

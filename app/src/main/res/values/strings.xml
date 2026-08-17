@@ -26,4 +26,8 @@
 
     <string name="action_title">지금 어떻게 해야 하나요?</string>
     <string name="action_empty">정상적인 대화로 보입니다.</string>
+
+    <string name="notification_channel_name">보이스피싱 실시간 탐지</string>
+    <string name="notification_title">SafeguardAI 보호 중</string>
+    <string name="notification_content">통화 내용을 실시간으로 분석하여 피싱을 감지하고 있습니다.</string>
 </resources>
